@@ -1,0 +1,66 @@
+{
+    "name": "platine-php/http",
+    "description": "Platine HTTP Message is the implementation of PSR 7",
+    "type": "library",
+    "license": "MIT",
+    "keywords": ["application", "website", "development", "framework", "php", "platine", "http", "message"],
+    "authors": [
+        {
+            "name": "NGUEREZA Tony",
+            "email": "nguerezatony@gmail.com",
+            "homepage": "http://www.iacademy.cf",
+            "role": "developer"
+        }
+    ],
+
+    "support": {
+        "issues": "https://github.com/platine-php/http/issues",
+        "source": "https://github.com/platine-php/http"
+    },
+	
+    "require": {
+        "php": "^7.4 || ^8"
+    },
+	
+    "require-dev": {
+        "mikey179/vfsstream": "2.0.x-dev",
+        "phpmd/phpmd": "@stable",
+        "phpunit/phpunit": "^9",
+        "platine-php/test-tools": "1.0.x-dev",
+        "squizlabs/php_codesniffer": "3.*",
+        "vimeo/psalm": "4.x-dev"
+    },
+    
+    "autoload": {
+        "psr-4":{
+            "Platine\\Http\\": "src/"
+        }
+    },
+    
+    "autoload-dev": {
+        "psr-4":{
+            "Platine\\Test\\": "tests"
+        },
+        "files": ["tests/fixtures/mocks.php"]
+    },
+    
+    "config": {
+        "sort-packages": true
+    },
+    
+    "extra": {
+        "branch-alias": {
+            "dev-develop": "1.0.x-dev"
+        }
+    },
+
+    "scripts": {
+        "test": "phpunit --colors=always",
+        "static": "psalm",
+        "check": "phpcs",
+        "check-fix": "phpcbf",
+        "analyze": "phpmd src xml phpmd.xml"
+    },
+	
+    "minimum-stability": "dev"
+}
