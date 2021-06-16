@@ -8,6 +8,7 @@
  * This content is released under the MIT License (MIT)
  *
  * Copyright (c) 2020 Platine HTTP
+ * Copyright (c) 2019 Dion Chaika
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -45,6 +46,8 @@
 declare(strict_types=1);
 
 namespace Platine\Http;
+
+use InvalidArgumentException;
 
 /**
  * Representation of an outgoing, client-side request.
@@ -101,7 +104,7 @@ interface RequestInterface extends MessageInterface
      * @see http://tools.ietf.org/html/rfc7230#section-5.3 (for the various
      *     request-target forms allowed in request messages)
      * @param mixed $requestTarget
-     * @return \Platine\Http\RequestInterface
+     * @return RequestInterface
      */
     public function withRequestTarget($requestTarget): RequestInterface;
 
@@ -124,8 +127,8 @@ interface RequestInterface extends MessageInterface
      * changed request method.
      *
      * @param string $method Case-sensitive method.
-     * @return \Platine\Http\RequestInterface
-     * @throws \InvalidArgumentException for invalid HTTP methods.
+     * @return RequestInterface
+     * @throws InvalidArgumentException for invalid HTTP methods.
      */
     public function withMethod(string $method): RequestInterface;
 
@@ -168,7 +171,7 @@ interface RequestInterface extends MessageInterface
      * @see http://tools.ietf.org/html/rfc3986#section-4.3
      * @param UriInterface $uri New request URI to use.
      * @param bool $preserveHost Preserve the original state of the Host header.
-     * @return \Platine\Http\RequestInterface
+     * @return $this
      */
-    public function withUri(UriInterface $uri, bool $preserveHost = false): RequestInterface;
+    public function withUri(UriInterface $uri, bool $preserveHost = false): self;
 }

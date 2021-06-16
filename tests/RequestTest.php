@@ -7,7 +7,7 @@ namespace Platine\Test\Http;
 use Platine\Http\Uri;
 use Platine\Http\Request;
 use Platine\Http\Stream;
-use Platine\PlatineTestCase;
+use Platine\Dev\PlatineTestCase;
 
 /**
  * Request class tests

@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Platine\Test\Http;
 
 use Platine\Http\Uri;
-use Platine\PlatineTestCase;
+use Platine\Dev\PlatineTestCase;
 
 /**
  * Uri class tests

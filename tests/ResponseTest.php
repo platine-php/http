@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Platine\Test\Http;
 
-use Platine\Http\Uri;
+use InvalidArgumentException;
+use Platine\Dev\PlatineTestCase;
 use Platine\Http\Response;
 use Platine\Http\Stream;
 use Platine\Http\StreamInterface;
-use Platine\PlatineTestCase;
 
 /**
  * Response class tests
@@ -42,14 +42,14 @@ class ResponseTest extends PlatineTestCase
         $this->assertEquals('Not authorized', $resp->getReasonPhrase());
 
         //invalid status code
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(InvalidArgumentException::class);
         $resp = $resp->withStatus(999, '');
     }
 
     public function testfilterStatusCodeUnsedCode(): void
     {
         $resp = new Response();
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(InvalidArgumentException::class);
         $resp = $resp->withStatus(306, '');
     }
 

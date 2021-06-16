@@ -8,6 +8,7 @@
  * This content is released under the MIT License (MIT)
  *
  * Copyright (c) 2020 Platine HTTP
+ * Copyright (c) 2019 Dion Chaika
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -45,6 +46,8 @@
 declare(strict_types=1);
 
 namespace Platine\Http;
+
+use InvalidArgumentException;
 
 class Response extends Message implements ResponseInterface
 {
@@ -205,6 +208,7 @@ class Response extends Message implements ResponseInterface
             $this->getStatusCode(),
             $this->getReasonPhrase()
         );
+
         foreach (array_keys($this->headers) as $header) {
             if (strtolower($header) === 'set-cookie') {
                 foreach ($this->getHeader('Set-Cookie') as $setCookie) {
@@ -237,11 +241,15 @@ class Response extends Message implements ResponseInterface
     protected function filterStatusCode(int $code): int
     {
         if ($code === 306) {
-            throw new \InvalidArgumentException('Invalid status code! Status code 306 is unused.');
+            throw new InvalidArgumentException(
+                'Invalid status code! Status code 306 is unused.'
+            );
         }
 
         if ($code < 100 || $code > 599) {
-            throw new \InvalidArgumentException('Invalid status code! Status code must be between 100 and 599.');
+            throw new InvalidArgumentException(
+                'Invalid status code! Status code must be between 100 and 599.'
+            );
         }
 
         return $code;

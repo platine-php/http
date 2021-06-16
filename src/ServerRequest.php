@@ -8,6 +8,7 @@
  * This content is released under the MIT License (MIT)
  *
  * Copyright (c) 2020 Platine HTTP
+ * Copyright (c) 2019 Dion Chaika
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -47,42 +48,44 @@ declare(strict_types=1);
 
 namespace Platine\Http;
 
+use InvalidArgumentException;
+
 class ServerRequest extends Request implements ServerRequestInterface
 {
 
     /**
      * The array of servers params
-     * @var array
+     * @var array<string, mixed>
      */
     protected array $serverParams = [];
 
     /**
      * The array of cookie params
-     * @var array
+     * @var array<string, mixed>
      */
     protected array $cookieParams = [];
 
     /**
      * The array of query params
-     * @var array
+     * @var array<string, mixed>
      */
     protected array $queryParams = [];
 
     /**
      * The array of uploaded files
-     * @var array
+     * @var array<string, mixed>
      */
     protected array $uploadedFiles = [];
 
     /**
      * The parse body content
-     * @var object|array|null
+     * @var object|array<string, mixed>|null
      */
     protected $parsedBody;
 
     /**
      * The array of request attributes
-     * @var array
+     * @var array<string, mixed>
      */
     protected array $attributes = [];
 
@@ -90,7 +93,7 @@ class ServerRequest extends Request implements ServerRequestInterface
      * Create new ServerRequest object
      * @param string $method       the HTTP request method
      * @param UriInterface|string|null $uri
-     * @param array  $serverParams the array of server params
+     * @param array<string, mixed>  $serverParams the array of server params
      */
     public function __construct(
         string $method = 'GET',
@@ -101,13 +104,14 @@ class ServerRequest extends Request implements ServerRequestInterface
         parent::__construct($method, $uri);
     }
 
+    /**
+     * Create instance using global variables
+     * @return ServerRequest
+     * @throws InvalidArgumentException
+     */
     public static function createFromGlobals(): ServerRequest
     {
-        $method = isset($_POST['_method'])
-                ? $_POST['_method']
-                : (!empty($_SERVER['REQUEST_METHOD'])
-                    ? $_SERVER['REQUEST_METHOD']
-                    : 'GET');
+        $method = $_POST['_method'] ?? $_SERVER['REQUEST_METHOD'] ?? 'GET';
 
         $protocolVersion = '1.1';
         if (!empty($_SERVER['SERVER_PROTOCOL'])) {
@@ -120,7 +124,7 @@ class ServerRequest extends Request implements ServerRequestInterface
         $uri = Uri::createFromGlobals();
         $uploadedFiles = UploadedFile::createFromGlobals();
 
-        $request = (new static($method, $uri, $_SERVER))
+        $request = (new self($method, $uri, $_SERVER))
                 ->withoutHeader('Host')
                 ->withProtocolVersion($protocolVersion)
                 ->withQueryParams($_GET)
@@ -141,7 +145,9 @@ class ServerRequest extends Request implements ServerRequestInterface
         }
 
         if ($protocolVersion === '1.1' && !$request->hasHeader('Host')) {
-            throw new \InvalidArgumentException('Invalid request! "HTTP/1.1" request must contain a "Host" header');
+            throw new InvalidArgumentException(
+                'Invalid request! "HTTP/1.1" request must contain a "Host" header'
+            );
         }
 
         return $request->withBody(new Stream('php://input'));
@@ -282,13 +288,12 @@ class ServerRequest extends Request implements ServerRequestInterface
             if (is_array($uploadedFile)) {
                 $this->filterUploadedFiles($uploadedFile);
             } elseif (!$uploadedFile instanceof UploadedFileInterface) {
-                throw new \InvalidArgumentException('Invalid structure of uploaded files tree, 
+                throw new InvalidArgumentException('Invalid structure of uploaded files tree, 
                                                     each uploaded file must be an instance of UploadedFileInterface');
             }
         }
 
         return $uploadedFiles;
-        ;
     }
 
     /**
@@ -299,7 +304,7 @@ class ServerRequest extends Request implements ServerRequestInterface
     protected function filterParsedBody($data)
     {
         if ($data !== null && !is_array($data) && !is_object($data)) {
-            throw new \InvalidArgumentException('Invalid parsed body! Parsed body must be an array or an object');
+            throw new InvalidArgumentException('Invalid parsed body! Parsed body must be an array or an object');
         }
 
         return $data;

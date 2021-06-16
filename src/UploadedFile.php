@@ -8,6 +8,7 @@
  * This content is released under the MIT License (MIT)
  *
  * Copyright (c) 2020 Platine HTTP
+ * Copyright (c) 2019 Dion Chaika
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -123,6 +124,10 @@ class UploadedFile implements UploadedFileInterface
         $this->clientMediaType = $clientMediaType;
     }
 
+    /**
+    * Create uploaded file from global variable $_FILES
+    * @return array<mixed>
+    */
     public static function createFromGlobals(): array
     {
         return static::normalize($_FILES);

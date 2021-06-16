@@ -8,6 +8,7 @@
  * This content is released under the MIT License (MIT)
  *
  * Copyright (c) 2020 Platine HTTP
+ * Copyright (c) 2019 Dion Chaika
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -162,6 +163,7 @@ class Request extends Message implements RequestInterface
         if ($preserveHost && $that->hasHeader('Host')) {
             return $that;
         }
+
         return $that->withHeader('Host', $that->getHostHeader());
     }
 

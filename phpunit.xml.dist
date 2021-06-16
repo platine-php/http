@@ -10,7 +10,7 @@
         stopOnSkipped="false"
         stderr="true">
   <testsuites>
-    <testsuite name="Platine Test Tools Tests Suites">
+    <testsuite name="Platine HTTP Tests Suites">
       <directory suffix="Test.php">tests/</directory>
     </testsuite>
   </testsuites>

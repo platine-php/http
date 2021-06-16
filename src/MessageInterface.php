@@ -8,6 +8,7 @@
  * This content is released under the MIT License (MIT)
  *
  * Copyright (c) 2020 Platine HTTP
+ * Copyright (c) 2019 Dion Chaika
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -46,6 +47,8 @@ declare(strict_types=1);
 
 namespace Platine\Http;
 
+use InvalidArgumentException;
+
 /**
  * HTTP messages consist of requests from a client to a server and responses
  * from a server to a client. This interface defines the methods common to
@@ -81,9 +84,9 @@ interface MessageInterface
      * new protocol version.
      *
      * @param string $version HTTP protocol version
-     * @return \Platine\Http\MessageInterface
+     * @return self
      */
-    public function withProtocolVersion(string $version): MessageInterface;
+    public function withProtocolVersion(string $version): self;
 
     /**
      * Retrieves all message header values.
@@ -106,7 +109,7 @@ interface MessageInterface
      * While header names are not case-sensitive, getHeaders() will preserve the
      * exact case in which headers were originally specified.
      *
-     * @return array Returns an associative array of the message's headers.
+     * @return array<string, array<string>> Returns an associative array of the message's headers.
      *     Each key MUST be a header name, and each value MUST be an array of
      *     strings for that header.
      */
@@ -132,7 +135,7 @@ interface MessageInterface
      * empty array.
      *
      * @param string $name Case-insensitive header field name.
-     * @return array An array of string values as provided for the given
+     * @return array<string> An array of string values as provided for the given
      *    header. If the header does not appear in the message, this method MUST
      *    return an empty array.
      */
@@ -170,11 +173,11 @@ interface MessageInterface
      * new and/or updated header and value.
      *
      * @param string $name Case-insensitive header field name.
-     * @param string|array $value Header value(s).
-     * @return \Platine\Http\MessageInterface
-     * @throws \InvalidArgumentException for invalid header names or values.
+     * @param string|array<string> $value Header value(s).
+     * @return $this
+     * @throws InvalidArgumentException for invalid header names or values.
      */
-    public function withHeader(string $name, $value): MessageInterface;
+    public function withHeader(string $name, $value): self;
 
     /**
      * Return an instance with the specified header appended with the given value.
@@ -188,10 +191,10 @@ interface MessageInterface
      * new header and/or value.
      *
      * @param string $name Case-insensitive header field name to add.
-     * @param string|array $value Header value(s).
-     * @return \Platine\Http\MessageInterface
-     * @throws \InvalidArgumentException for invalid header names.
-     * @throws \InvalidArgumentException for invalid header values.
+     * @param string|array<string> $value Header value(s).
+     * @return MessageInterface
+     * @throws InvalidArgumentException for invalid header names.
+     * @throws InvalidArgumentException for invalid header values.
      */
     public function withAddedHeader(string $name, $value): MessageInterface;
 
@@ -205,7 +208,7 @@ interface MessageInterface
      * the named header.
      *
      * @param string $name Case-insensitive header field name to remove.
-     * @return \Platine\Http\MessageInterface
+     * @return MessageInterface
      */
     public function withoutHeader(string $name): MessageInterface;
 
@@ -226,8 +229,8 @@ interface MessageInterface
      * new body stream.
      *
      * @param StreamInterface $body Body.
-     * @return \Platine\Http\MessageInterface
-     * @throws \InvalidArgumentException When the body is not valid.
+     * @return MessageInterface
+     * @throws InvalidArgumentException When the body is not valid.
      */
     public function withBody(StreamInterface $body): MessageInterface;
 }

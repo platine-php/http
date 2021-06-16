@@ -8,6 +8,7 @@
  * This content is released under the MIT License (MIT)
  *
  * Copyright (c) 2020 Platine HTTP
+ * Copyright (c) 2019 Dion Chaika
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -46,6 +47,10 @@ declare(strict_types=1);
 
 namespace Platine\Http;
 
+use Exception;
+use InvalidArgumentException;
+use RuntimeException;
+
 class Stream implements StreamInterface
 {
 
@@ -61,7 +66,7 @@ class Stream implements StreamInterface
 
     /**
      * The stream resource
-     * @var resource
+     * @var resource|null
      */
     protected $resource;
 
@@ -93,7 +98,7 @@ class Stream implements StreamInterface
      * Create new Stream
      * @param string|resource $content the filename or resource instance
      * @param string $mode    the stream mode
-     * @param array  $options the stream options
+     * @param array<string, mixed>  $options the stream options
      */
     public function __construct($content = '', string $mode = 'r+', array $options = [])
     {
@@ -102,20 +107,20 @@ class Stream implements StreamInterface
                 $mode = $this->filterMode($mode);
                 $resource = fopen($content, $mode);
                 if ($resource === false) {
-                    throw new \RuntimeException(sprintf('Unable to create a stream from file [%s] !', $content));
+                    throw new RuntimeException(sprintf('Unable to create a stream from file [%s] !', $content));
                 }
                 $this->resource = $resource;
             } else {
                 $resource = fopen('php://temp', 'r+');
                 if ($resource === false || fwrite($resource, $content) === false) {
-                    throw new \RuntimeException('Unable to create a stream from string');
+                    throw new RuntimeException('Unable to create a stream from string');
                 }
                 $this->resource = $resource;
             }
         } elseif (is_resource($content)) {
             $this->resource = $content;
         } else {
-            throw new \InvalidArgumentException('Stream resource must be valid PHP resource');
+            throw new InvalidArgumentException('Stream resource must be valid PHP resource');
         }
 
         if (isset($options['size']) && is_int($options['size']) && $options['size'] >= 0) {
@@ -171,7 +176,7 @@ class Stream implements StreamInterface
                 $this->rewind();
             }
             return $this->getContents();
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return '';
         }
     }
@@ -216,11 +221,11 @@ class Stream implements StreamInterface
     public function tell(): int
     {
         if ($this->resource === null) {
-            throw new \RuntimeException('Stream resource is detached');
+            throw new RuntimeException('Stream resource is detached');
         }
         $position = ftell($this->resource);
         if ($position === false) {
-            throw new \RuntimeException('Unable to tell the current position of the stream read/write pointer');
+            throw new RuntimeException('Unable to tell the current position of the stream read/write pointer');
         }
 
         return $position;
@@ -248,15 +253,15 @@ class Stream implements StreamInterface
     public function seek(int $offset, $whence = SEEK_SET): void
     {
         if ($this->resource === null) {
-            throw new \RuntimeException('Stream resource is detached');
+            throw new RuntimeException('Stream resource is detached');
         }
 
         if (!$this->seekable) {
-            throw new \RuntimeException('Stream is not seekable');
+            throw new RuntimeException('Stream is not seekable');
         }
 
         if (fseek($this->resource, $offset, $whence) === -1) {
-            throw new \RuntimeException('Can not seek to a position in the stream');
+            throw new RuntimeException('Can not seek to a position in the stream');
         }
     }
 
@@ -282,16 +287,16 @@ class Stream implements StreamInterface
     public function write(string $string): int
     {
         if ($this->resource === null) {
-            throw new \RuntimeException('Stream resource is detached');
+            throw new RuntimeException('Stream resource is detached');
         }
 
         if (!$this->writable) {
-            throw new \RuntimeException('Stream is not writable');
+            throw new RuntimeException('Stream is not writable');
         }
         $bytes = fwrite($this->resource, $string);
 
         if ($bytes === false) {
-            throw new \RuntimeException('Unable to write data to the stream');
+            throw new RuntimeException('Unable to write data to the stream');
         }
 
         $fstat = fstat($this->resource);
@@ -317,16 +322,16 @@ class Stream implements StreamInterface
     public function read(int $length): string
     {
         if ($this->resource === null) {
-            throw new \RuntimeException('Stream resource is detached');
+            throw new RuntimeException('Stream resource is detached');
         }
 
         if (!$this->readable) {
-            throw new \RuntimeException('Stream is not readable');
+            throw new RuntimeException('Stream is not readable');
         }
 
         $data = fread($this->resource, $length);
         if ($data === false) {
-            throw new \RuntimeException('Unable to read data from the stream');
+            throw new RuntimeException('Unable to read data from the stream');
         }
 
         return $data;
@@ -338,17 +343,17 @@ class Stream implements StreamInterface
     public function getContents(): string
     {
         if ($this->resource === null) {
-            throw new \RuntimeException('Stream resource is detached');
+            throw new RuntimeException('Stream resource is detached');
         }
 
         if (!$this->readable) {
-            throw new \RuntimeException('Stream is not readable');
+            throw new RuntimeException('Stream is not readable');
         }
 
         $contents = stream_get_contents($this->resource);
 
         if ($contents === false) {
-            throw new \RuntimeException('Unable to get contents of the stream');
+            throw new RuntimeException('Unable to get contents of the stream');
         }
 
         return $contents;
@@ -359,6 +364,10 @@ class Stream implements StreamInterface
      */
     public function getMetadata(string $key = null)
     {
+        if ($this->resource === null) {
+            throw new RuntimeException('Stream resource is detached');
+        }
+
         $meta = stream_get_meta_data($this->resource);
         if ($key === null) {
             return $meta;
@@ -370,14 +379,14 @@ class Stream implements StreamInterface
      * Check if the given mode is valid
      * @param  string $mode the mode
      * @return string
-     * @throws \InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     protected function filterMode(string $mode): string
     {
         if (
                 !in_array($mode, static::MODES_WRITE) && !in_array($mode, static::MODES_READ)
         ) {
-            throw new \InvalidArgumentException(sprintf('Invalid mode %s', $mode));
+            throw new InvalidArgumentException(sprintf('Invalid mode %s', $mode));
         }
         return $mode;
     }

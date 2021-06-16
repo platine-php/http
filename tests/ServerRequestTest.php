@@ -8,7 +8,7 @@ use Platine\Http\Uri;
 use Platine\Http\ServerRequest;
 use Platine\Http\UploadedFile;
 use Platine\Http\Stream;
-use Platine\PlatineTestCase;
+use Platine\Dev\PlatineTestCase;
 
 /**
  * ServerRequest class tests

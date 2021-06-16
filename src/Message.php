@@ -8,6 +8,7 @@
  * This content is released under the MIT License (MIT)
  *
  * Copyright (c) 2020 Platine HTTP
+ * Copyright (c) 2019 Dion Chaika
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -57,7 +58,7 @@ abstract class Message implements MessageInterface
 
     /**
      * The array of message headers
-     * @var array
+     * @var array<string, array<string>>
      */
     protected array $headers = [];
 
@@ -82,6 +83,7 @@ abstract class Message implements MessageInterface
     {
         $that = clone $this;
         $that->protocolVersion = $version;
+
         return $that;
     }
 
@@ -95,6 +97,7 @@ abstract class Message implements MessageInterface
             $name = implode('-', array_map('ucfirst', explode('-', strtolower($name))));
             $headers[$name] = $values;
         }
+
         return $headers;
     }
 
@@ -103,8 +106,9 @@ abstract class Message implements MessageInterface
      */
     public function hasHeader(string $name): bool
     {
-        $name = strtolower($name);
-        return isset($this->headers[$name]);
+        $lowerName = strtolower($name);
+
+        return isset($this->headers[$lowerName]);
     }
 
     /**
@@ -112,8 +116,9 @@ abstract class Message implements MessageInterface
      */
     public function getHeader(string $name): array
     {
-        $name = strtolower($name);
-        return isset($this->headers[$name]) ? $this->headers[$name] : [];
+        $lowerName = strtolower($name);
+
+        return $this->headers[$lowerName] ?? [];
     }
 
     /**
@@ -121,8 +126,10 @@ abstract class Message implements MessageInterface
      */
     public function getHeaderLine(string $name): string
     {
-        $name = strtolower($name);
-        return isset($this->headers[$name]) ? implode(', ', $this->headers[$name]) : '';
+        $lowerName = strtolower($name);
+        return isset($this->headers[$lowerName])
+                ? implode(', ', $this->headers[$lowerName])
+                : '';
     }
 
     /**
@@ -131,8 +138,8 @@ abstract class Message implements MessageInterface
     public function withHeader(string $name, $value): self
     {
         $that = clone $this;
-        $name = strtolower($name);
-        $that->headers[$name] = is_array($value) ? $value : [$value];
+        $lowerName = strtolower($name);
+        $that->headers[$lowerName] = is_array($value) ? $value : [$value];
 
         return $that;
     }
@@ -143,12 +150,17 @@ abstract class Message implements MessageInterface
     public function withAddedHeader(string $name, $value): self
     {
         $that = clone $this;
-        $name = strtolower($name);
+        $lowerName = strtolower($name);
         if (is_array($value)) {
             $value = array_values($value);
-            $that->headers[$name] = isset($that->headers[$name]) ? array_merge($that->headers[$name], $value) : $value;
+            $that->headers[$lowerName] = isset($that->headers[$lowerName])
+                                        ? array_merge(
+                                            $that->headers[$lowerName],
+                                            $value
+                                        )
+                                        : $value;
         } else {
-            $that->headers[$name][] = $value;
+            $that->headers[$lowerName][] = $value;
         }
         return $that;
     }
@@ -159,8 +171,9 @@ abstract class Message implements MessageInterface
     public function withoutHeader(string $name): self
     {
         $that = clone $this;
-        $name = strtolower($name);
-        unset($that->headers[$name]);
+        $lowerName = strtolower($name);
+        unset($that->headers[$lowerName]);
+
         return $that;
     }
 
@@ -185,11 +198,11 @@ abstract class Message implements MessageInterface
         $size = $body->getSize();
 
         if ($size === null) {
-            $that = $that->withHeader('Transfer-Encoding', 'chunked');
-            $that = $that->withoutHeader('Content-Length');
+            $that = $that->withHeader('Transfer-Encoding', 'chunked')
+                         ->withoutHeader('Content-Length');
         } else {
-            $that = $that->withHeader('Content-Length', (string) $size);
-            $that = $that->withoutHeader('Transfer-Encoding');
+            $that = $that->withHeader('Content-Length', (string) $size)
+                         ->withoutHeader('Transfer-Encoding');
         }
 
         return $that;

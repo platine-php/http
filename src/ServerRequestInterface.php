@@ -8,6 +8,7 @@
  * This content is released under the MIT License (MIT)
  *
  * Copyright (c) 2020 Platine HTTP
+ * Copyright (c) 2019 Dion Chaika
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -45,6 +46,8 @@
 declare(strict_types=1);
 
 namespace Platine\Http;
+
+use InvalidArgumentException;
 
 /**
  * Representation of an incoming, server-side HTTP request.
@@ -94,7 +97,7 @@ interface ServerRequestInterface extends RequestInterface
      * typically derived from PHP's $_SERVER superglobal. The data IS NOT
      * REQUIRED to originate from $_SERVER.
      *
-     * @return array
+     * @return array<string, mixed>
      */
     public function getServerParams(): array;
 
@@ -106,7 +109,7 @@ interface ServerRequestInterface extends RequestInterface
      * The data MUST be compatible with the structure of the $_COOKIE
      * superglobal.
      *
-     * @return array
+     * @return array<string, mixed>
      */
     public function getCookieParams(): array;
 
@@ -140,7 +143,7 @@ interface ServerRequestInterface extends RequestInterface
      * values, you may need to parse the query string from `getUri()->getQuery()`
      * or from the `QUERY_STRING` server param.
      *
-     * @return array
+     * @return array<string, mixed>
      */
     public function getQueryParams(): array;
 
@@ -173,12 +176,12 @@ interface ServerRequestInterface extends RequestInterface
      * Retrieve normalized file upload data.
      *
      * This method returns upload metadata in a normalized tree, with each leaf
-     * an instance of \Platine\Http\UploadedFileInterface.
+     * an instance of Platine\Http\UploadedFileInterface.
      *
      * These values MAY be prepared from $_FILES or the message body during
      * instantiation, or MAY be injected via withUploadedFiles().
      *
-     * @return array An array tree of UploadedFileInterface instances; an empty
+     * @return array<string, mixed> An array tree of UploadedFileInterface instances; an empty
      *     array MUST be returned if no data is present.
      */
     public function getUploadedFiles(): array;
@@ -194,7 +197,7 @@ interface ServerRequestInterface extends RequestInterface
      *
      * @return self
      *
-     * @throws \InvalidArgumentException if an invalid structure is provided.
+     * @throws InvalidArgumentException if an invalid structure is provided.
      */
     public function withUploadedFiles(array $uploadedFiles): self;
 
@@ -210,7 +213,7 @@ interface ServerRequestInterface extends RequestInterface
      * potential types MUST be arrays or objects only. A null value indicates
      * the absence of body content.
      *
-     * @return null|array|object The deserialized body parameters, if any.
+     * @return null|array<string, mixed>|object The deserialized body parameters, if any.
      *     These will typically be an array or object.
      */
     public function getParsedBody();
@@ -242,7 +245,7 @@ interface ServerRequestInterface extends RequestInterface
      *
      * @return self
      *
-     * @throws \InvalidArgumentException if an unsupported argument type is
+     * @throws InvalidArgumentException if an unsupported argument type is
      *     provided.
      */
     public function withParsedBody($data): self;
@@ -256,7 +259,7 @@ interface ServerRequestInterface extends RequestInterface
      * deserializing non-form-encoded message bodies; etc. Attributes
      * will be application and request specific, and CAN be mutable.
      *
-     * @return array Attributes derived from the request.
+     * @return array<string, mixed> Attributes derived from the request.
      */
     public function getAttributes(): array;
 
@@ -273,7 +276,7 @@ interface ServerRequestInterface extends RequestInterface
      * @see getAttributes()
      * @param string $name The attribute name.
      * @param mixed $default Default value to return if the attribute does not exist.
-     * @return mixed
+     * @return mixed|null
      */
     public function getAttribute(string $name, $default = null);
 

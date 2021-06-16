@@ -4,10 +4,11 @@ declare(strict_types=1);
 
 namespace Platine\Test\Http;
 
-use Platine\Http\Stream;
-use Platine\Http\StreamInterface;
+use InvalidArgumentException;
 use org\bovigo\vfs\vfsStream;
-use Platine\PlatineTestCase;
+use Platine\Dev\PlatineTestCase;
+use Platine\Http\Stream;
+use RuntimeException;
 
 /**
  * Stream class tests
@@ -66,14 +67,14 @@ class StreamTest extends PlatineTestCase
     {
         global $mock_fopen_to_false;
         $mock_fopen_to_false = true;
-        $this->expectException(\RuntimeException::class);
+        $this->expectException(RuntimeException::class);
         $file = $this->createVfsFile('source_file', $this->vfsFileStreamPath, 'test');
         $s = new Stream($file->url());
     }
 
     public function testConstructorUsingFileInvalidMode(): void
     {
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(InvalidArgumentException::class);
         $file = $this->createVfsFile('source_file', $this->vfsFileStreamPath, 'test');
         $s = new Stream($file->url(), 'foo');
     }
@@ -82,13 +83,13 @@ class StreamTest extends PlatineTestCase
     {
         global $mock_fopen_to_false;
         $mock_fopen_to_false = true;
-        $this->expectException(\RuntimeException::class);
+        $this->expectException(RuntimeException::class);
         $s = new Stream('Hello World');
     }
 
     public function testConstructorParamIsInvalid(): void
     {
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(InvalidArgumentException::class);
         $s = new Stream(36366);
     }
 
@@ -121,7 +122,7 @@ class StreamTest extends PlatineTestCase
         $this->assertFalse($s->isReadable());
         $this->assertFalse($s->isWritable());
 
-        $this->expectException(\RuntimeException::class);
+        $this->expectException(RuntimeException::class);
         $s->tell();
     }
 
@@ -134,7 +135,7 @@ class StreamTest extends PlatineTestCase
         $reflection = $this->getPrivateProtectedAttribute(Stream::class, 'resource');
         $this->assertIsResource($reflection->getValue($s));
 
-        $this->expectException(\RuntimeException::class);
+        $this->expectException(RuntimeException::class);
         $s->tell();
     }
 
@@ -163,7 +164,7 @@ class StreamTest extends PlatineTestCase
         $this->assertFalse($s->isReadable());
         $this->assertFalse($s->isWritable());
 
-        $this->expectException(\RuntimeException::class);
+        $this->expectException(RuntimeException::class);
         $s->seek(1);
     }
 
@@ -173,7 +174,7 @@ class StreamTest extends PlatineTestCase
         $s = new Stream($file->url(), 'r+', array('seekable' => false));
         $reflection = $this->getPrivateProtectedAttribute(Stream::class, 'resource');
         $this->assertIsResource($reflection->getValue($s));
-        $this->expectException(\RuntimeException::class);
+        $this->expectException(RuntimeException::class);
         $s->seek(1);
     }
 
@@ -185,7 +186,7 @@ class StreamTest extends PlatineTestCase
         $s = new Stream($file->url());
         $reflection = $this->getPrivateProtectedAttribute(Stream::class, 'resource');
         $this->assertIsResource($reflection->getValue($s));
-        $this->expectException(\RuntimeException::class);
+        $this->expectException(RuntimeException::class);
         $s->seek(1);
     }
 
@@ -214,7 +215,7 @@ class StreamTest extends PlatineTestCase
         $this->assertFalse($s->isReadable());
         $this->assertFalse($s->isWritable());
 
-        $this->expectException(\RuntimeException::class);
+        $this->expectException(RuntimeException::class);
         $s->write('foo');
     }
 
@@ -224,7 +225,7 @@ class StreamTest extends PlatineTestCase
         $s = new Stream($file->url(), 'r+', array('writable' => false));
         $reflection = $this->getPrivateProtectedAttribute(Stream::class, 'resource');
         $this->assertIsResource($reflection->getValue($s));
-        $this->expectException(\RuntimeException::class);
+        $this->expectException(RuntimeException::class);
         $s->write('foo');
     }
 
@@ -236,7 +237,7 @@ class StreamTest extends PlatineTestCase
         $s = new Stream($file->url());
         $reflection = $this->getPrivateProtectedAttribute(Stream::class, 'resource');
         $this->assertIsResource($reflection->getValue($s));
-        $this->expectException(\RuntimeException::class);
+        $this->expectException(RuntimeException::class);
         $s->write('foo');
     }
 
@@ -275,7 +276,7 @@ class StreamTest extends PlatineTestCase
         $this->assertFalse($s->isReadable());
         $this->assertFalse($s->isWritable());
 
-        $this->expectException(\RuntimeException::class);
+        $this->expectException(RuntimeException::class);
         $s->read(2);
     }
 
@@ -285,7 +286,7 @@ class StreamTest extends PlatineTestCase
         $s = new Stream($file->url(), 'r+', array('readable' => false));
         $reflection = $this->getPrivateProtectedAttribute(Stream::class, 'resource');
         $this->assertIsResource($reflection->getValue($s));
-        $this->expectException(\RuntimeException::class);
+        $this->expectException(RuntimeException::class);
         $s->read(3);
     }
 
@@ -297,7 +298,7 @@ class StreamTest extends PlatineTestCase
         $s = new Stream($file->url());
         $reflection = $this->getPrivateProtectedAttribute(Stream::class, 'resource');
         $this->assertIsResource($reflection->getValue($s));
-        $this->expectException(\RuntimeException::class);
+        $this->expectException(RuntimeException::class);
         $s->read(3);
     }
 
@@ -324,7 +325,7 @@ class StreamTest extends PlatineTestCase
         $this->assertFalse($s->isReadable());
         $this->assertFalse($s->isWritable());
 
-        $this->expectException(\RuntimeException::class);
+        $this->expectException(RuntimeException::class);
         $s->getContents();
     }
 
@@ -334,7 +335,7 @@ class StreamTest extends PlatineTestCase
         $s = new Stream($file->url(), 'r+', array('readable' => false));
         $reflection = $this->getPrivateProtectedAttribute(Stream::class, 'resource');
         $this->assertIsResource($reflection->getValue($s));
-        $this->expectException(\RuntimeException::class);
+        $this->expectException(RuntimeException::class);
         $s->getContents();
     }
 
@@ -347,7 +348,7 @@ class StreamTest extends PlatineTestCase
         $s = new Stream($file->url());
         $reflection = $this->getPrivateProtectedAttribute(Stream::class, 'resource');
         $this->assertIsResource($reflection->getValue($s));
-        $this->expectException(\RuntimeException::class);
+        $this->expectException(RuntimeException::class);
         $s->getContents();
     }
 
@@ -377,6 +378,16 @@ class StreamTest extends PlatineTestCase
         //Key is not found
         $meta = $s->getMetadata('very_not_found_key');
         $this->assertNull($meta);
+    }
+
+    public function testGetMetadataResourceDetached(): void
+    {
+        $this->expectException(RuntimeException::class);
+        $file = $this->createVfsFile('stream_source_file', $this->vfsFileStreamPath, 'test');
+        $s = new Stream($file->url());
+
+        $s->close();
+        $s->getMetadata();
     }
 
     public function testToStringSuccess(): void

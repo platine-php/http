@@ -8,7 +8,7 @@ use Platine\Http\UploadedFile;
 use Platine\Http\Stream;
 use Platine\Http\StreamInterface;
 use org\bovigo\vfs\vfsStream;
-use Platine\PlatineTestCase;
+use Platine\Dev\PlatineTestCase;
 
 /**
  * UploadedFile class tests
