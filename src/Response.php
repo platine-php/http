@@ -159,9 +159,6 @@ class Response extends Message implements ResponseInterface
                     : '';
         }
         $this->reasonPhrase = $reasonPhrase;
-
-        // Set common headers
-        $this->setCommonHeaders();
     }
 
     /**
@@ -255,21 +252,5 @@ class Response extends Message implements ResponseInterface
         }
 
         return $code;
-    }
-
-    /**
-     * Set the common headers to be used
-     * @return $this
-     */
-    protected function setCommonHeaders(): self
-    {
-        $this->withAddedHeader(
-            'Content-Security-Policy',
-            'default-src \'self\'; frame-ancestors \'self\'; form-action \'self\';'
-        );
-
-        $this->withAddedHeader('X-Content-Type-Options', 'nosniff');
-
-        return $this;
     }
 }
