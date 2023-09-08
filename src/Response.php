@@ -38,7 +38,7 @@
  *  @author Platine Developers Team
  *  @copyright  Copyright (c) 2020
  *  @license    http://opensource.org/licenses/MIT  MIT License
- *  @link   http://www.iacademy.cf
+ *  @link   https://www.platine-php.com
  *  @version 1.0.0
  *  @filesource
  */
@@ -51,7 +51,6 @@ use InvalidArgumentException;
 
 class Response extends Message implements ResponseInterface
 {
-
     /**
      * The reason phrases.
      */
@@ -160,6 +159,9 @@ class Response extends Message implements ResponseInterface
                     : '';
         }
         $this->reasonPhrase = $reasonPhrase;
+
+        // Set common headers
+        $this->setCommonHeaders();
     }
 
     /**
@@ -253,5 +255,21 @@ class Response extends Message implements ResponseInterface
         }
 
         return $code;
+    }
+
+    /**
+     * Set the common headers to be used
+     * @return $this
+     */
+    protected function setCommonHeaders(): self
+    {
+        $this->withAddedHeader(
+            'Content-Security-Policy',
+            'default-src \'self\'; frame-ancestors \'self\'; form-action \'self\';'
+        );
+
+        $this->withAddedHeader('X-Content-Type-Options', 'nosniff');
+
+        return $this;
     }
 }

@@ -16,7 +16,6 @@ use Platine\Dev\PlatineTestCase;
  */
 class UriTest extends PlatineTestCase
 {
-
     protected function setUp(): void
     {
         parent::setUp();

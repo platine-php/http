@@ -19,7 +19,6 @@ use Platine\Http\StreamInterface;
  */
 class ResponseTest extends PlatineTestCase
 {
-
     public function testConstructor(): void
     {
         //Default

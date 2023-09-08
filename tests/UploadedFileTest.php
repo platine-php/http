@@ -19,7 +19,6 @@ use Platine\Dev\PlatineTestCase;
  */
 class UploadedFileTest extends PlatineTestCase
 {
-
     public const STREAM_TEST_FILENAME = 'file_name_test_stream';
     public const STREAM_TEST_TARGET_FILENAME = 'file_name_test_target_stream';
 

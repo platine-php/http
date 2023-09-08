@@ -19,7 +19,6 @@ use RuntimeException;
  */
 class StreamTest extends PlatineTestCase
 {
-
     protected $vfsRoot;
     protected $vfsFileStreamPath;
 

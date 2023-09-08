@@ -18,7 +18,6 @@ use Platine\Dev\PlatineTestCase;
  */
 class RequestTest extends PlatineTestCase
 {
-
     protected function setUp(): void
     {
         parent::setUp();
