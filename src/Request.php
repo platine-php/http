@@ -47,6 +47,10 @@ declare(strict_types=1);
 
 namespace Platine\Http;
 
+/**
+ * @class Request
+ * @package Platine\Http
+ */
 class Request extends Message implements RequestInterface
 {
     /**
@@ -209,13 +213,21 @@ class Request extends Message implements RequestInterface
      */
     protected function getHostHeader(): string
     {
-        $host = $this->uri->getHost();
+        $host = '';
+        if ($this->uri !== null) {
+            $host = $this->uri->getHost();
+        }
+
         if ($host !== '') {
-            $port = $this->uri->getPort();
+            $port = null;
+            if ($this->uri !== null) {
+                $port = $this->uri->getPort();
+            }
             if ($port !== null) {
                 $host .= ':' . $port;
             }
         }
+
         return $host;
     }
 

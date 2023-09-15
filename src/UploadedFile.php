@@ -47,6 +47,9 @@ declare(strict_types=1);
 
 namespace Platine\Http;
 
+use InvalidArgumentException;
+use RuntimeException;
+
 class UploadedFile implements UploadedFileInterface
 {
     /**
@@ -109,7 +112,7 @@ class UploadedFile implements UploadedFileInterface
     ) {
         if ($filenameOrStream instanceof StreamInterface) {
             if (!$filenameOrStream->isReadable()) {
-                throw new \InvalidArgumentException('Stream is not readable');
+                throw new InvalidArgumentException('Stream is not readable');
             }
             $this->stream = $filenameOrStream;
             $this->size = $size ? $size : $filenameOrStream->getSize();
@@ -138,10 +141,10 @@ class UploadedFile implements UploadedFileInterface
     public function getStream(): StreamInterface
     {
         if ($this->moved) {
-            throw new \RuntimeException('Stream is not avaliable! Uploaded file is moved');
+            throw new RuntimeException('Stream is not avaliable! Uploaded file is moved');
         }
 
-        if ($this->stream === null) {
+        if ($this->stream === null && $this->filename !== null) {
             $this->stream = new Stream($this->filename);
         }
 
@@ -154,23 +157,23 @@ class UploadedFile implements UploadedFileInterface
     public function moveTo(string $targetPath): void
     {
         if ($this->moved) {
-            throw new \RuntimeException('Uploaded file is already moved');
+            throw new RuntimeException('Uploaded file is already moved');
         }
 
-        $targetPath = $this->filterTargetPath($targetPath);
+        $cleanTargetPath = $this->filterTargetPath($targetPath);
         if ($this->filename !== null) {
             if (php_sapi_name() === 'cli') {
-                if (rename($this->filename, $targetPath) === false) {
-                    throw new \RuntimeException('Unable to rename the uploaded file');
+                if (rename($this->filename, $cleanTargetPath) === false) {
+                    throw new RuntimeException('Unable to rename the uploaded file');
                 }
             } else {
                 if (
-                        is_uploaded_file($this->filename) === false || move_uploaded_file(
-                            $this->filename,
-                            $targetPath
-                        ) === false
+                    is_uploaded_file($this->filename) === false || move_uploaded_file(
+                        $this->filename,
+                        $cleanTargetPath
+                    ) === false
                 ) {
-                    throw new \RuntimeException('Unable to move the uploaded file');
+                    throw new RuntimeException('Unable to move the uploaded file');
                 }
             }
         } else {
@@ -178,7 +181,7 @@ class UploadedFile implements UploadedFileInterface
             if ($stream->isSeekable()) {
                 $stream->rewind();
             }
-            $dest = new Stream($targetPath);
+            $dest = new Stream($cleanTargetPath);
             $bufferSize = 8192;
             while (!$stream->eof()) {
                 if (!$dest->write($stream->read($bufferSize))) {
@@ -224,8 +227,8 @@ class UploadedFile implements UploadedFileInterface
 
     /**
      * Normalize files according to standard
-     * @param  array  $files
-     * @return array
+     * @param  array<string, array<string, mixed|UploadedFileInterface>>  $files
+     * @return array<string, UploadedFileInterface|UploadedFileInterface[]>
      */
     public static function normalize(array $files): array
     {
@@ -271,7 +274,7 @@ class UploadedFile implements UploadedFileInterface
 
     /**
      * Filter the uploded file error
-     * @param  int    $error
+     * @param  int  $error
      * @return int
      */
     protected function filterError(int $error): int
@@ -288,7 +291,7 @@ class UploadedFile implements UploadedFileInterface
         ];
 
         if (!in_array($error, $validErrors)) {
-            throw new \InvalidArgumentException('Upload error code must be a PHP file upload error.');
+            throw new InvalidArgumentException('Upload error code must be a PHP file upload error.');
         }
 
         return $error;
@@ -302,7 +305,7 @@ class UploadedFile implements UploadedFileInterface
     protected function filterTargetPath(string $targetPath): string
     {
         if ($targetPath === '') {
-            throw new \InvalidArgumentException('Target path can not be empty.');
+            throw new InvalidArgumentException('Target path can not be empty.');
         }
         return $targetPath;
     }

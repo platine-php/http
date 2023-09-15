@@ -126,7 +126,7 @@ interface ServerRequestInterface extends RequestInterface
      * immutability of the message, and MUST return an instance that has the
      * updated cookie values.
      *
-     * @param array $cookies Array of key/value pairs representing cookies.
+     * @param array<string, mixed> $cookies Array of key/value pairs representing cookies.
      *
      * @return self
      */
@@ -164,7 +164,7 @@ interface ServerRequestInterface extends RequestInterface
      * immutability of the message, and MUST return an instance that has the
      * updated query string arguments.
      *
-     * @param array $query Array of query string arguments, typically from
+     * @param array<string, mixed> $query Array of query string arguments, typically from
      *     $_GET.
      *
      * @return self
@@ -180,7 +180,7 @@ interface ServerRequestInterface extends RequestInterface
      * These values MAY be prepared from $_FILES or the message body during
      * instantiation, or MAY be injected via withUploadedFiles().
      *
-     * @return array<string, mixed> An array tree of UploadedFileInterface instances; an empty
+     * @return array<string|int, mixed|UploadedFileInterface> An array tree of UploadedFileInterface instances; an empty
      *     array MUST be returned if no data is present.
      */
     public function getUploadedFiles(): array;
@@ -192,7 +192,7 @@ interface ServerRequestInterface extends RequestInterface
      * immutability of the message, and MUST return an instance that has the
      * updated body parameters.
      *
-     * @param array $uploadedFiles An array tree of UploadedFileInterface instances.
+     * @param UploadedFileInterface[] $uploadedFiles An array tree of UploadedFileInterface instances.
      *
      * @return self
      *
@@ -239,7 +239,7 @@ interface ServerRequestInterface extends RequestInterface
      * immutability of the message, and MUST return an instance that has the
      * updated body parameters.
      *
-     * @param null|array|object $data The deserialized body data. This will
+     * @param null|array<string|int, mixed>|object $data The deserialized body data. This will
      *     typically be in an array or object.
      *
      * @return self

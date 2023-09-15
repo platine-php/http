@@ -224,7 +224,7 @@ class Uri implements UriInterface
      */
     public function getQuery(): string
     {
-        return $this->query;
+        return $this->query ?? '';
     }
 
     /**
@@ -506,7 +506,7 @@ class Uri implements UriInterface
                     'Path must be compliant with the "RFC 3986" standart'
                 );
             }
-            return preg_replace_callback(
+            return (string) preg_replace_callback(
                 '/(?:[^a-zA-Z0-9\-._~!$&\'()*+,;=:@\/%]++|%(?![a-fA-F0-9]{2}))/',
                 function ($matches) {
                     return rawurlencode($matches[0]);
@@ -536,7 +536,7 @@ class Uri implements UriInterface
                     'Query must be compliant with the "RFC 3986" standart'
                 );
             }
-            return preg_replace_callback(
+            return (string) preg_replace_callback(
                 '/(?:[^a-zA-Z0-9\-._~!$&\'()*+,;=:@\/?%]++|%(?![a-fA-F0-9]{2}))/',
                 function ($matches) {
                     return rawurlencode($matches[0]);
@@ -556,7 +556,7 @@ class Uri implements UriInterface
     protected function filterFragment(string $fragment): string
     {
         if ($fragment !== '') {
-            return preg_replace_callback(
+            return (string) preg_replace_callback(
                 '/(?:[^a-zA-Z0-9\-._~!$&\'()*+,;=:@\/?%]++|%(?![a-fA-F0-9]{2}))/',
                 function ($matches) {
                     return rawurlencode($matches[0]);

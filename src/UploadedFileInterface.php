@@ -47,6 +47,9 @@ declare(strict_types=1);
 
 namespace Platine\Http;
 
+use InvalidArgumentException;
+use RuntimeException;
+
 /**
  * Value object representing a file uploaded through an HTTP request.
  *
@@ -70,8 +73,8 @@ interface UploadedFileInterface
      * an exception.
      *
      * @return StreamInterface Stream representation of the uploaded file.
-     * @throws \RuntimeException in cases when no stream is available.
-     * @throws \RuntimeException in cases when no stream can be created.
+     * @throws RuntimeException in cases when no stream is available.
+     * @throws RuntimeException in cases when no stream can be created.
      */
     public function getStream(): StreamInterface;
 
@@ -103,9 +106,9 @@ interface UploadedFileInterface
      * @see http://php.net/is_uploaded_file
      * @see http://php.net/move_uploaded_file
      * @param string $targetPath Path to which to move the uploaded file.
-     * @throws \InvalidArgumentException if the $targetPath specified is invalid.
-     * @throws \RuntimeException on any error during the move operation.
-     * @throws \RuntimeException on the second or subsequent call to the method.
+     * @throws InvalidArgumentException if the $targetPath specified is invalid.
+     * @throws RuntimeException on any error during the move operation.
+     * @throws RuntimeException on the second or subsequent call to the method.
      */
     public function moveTo(string $targetPath): void;
 

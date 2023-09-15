@@ -83,7 +83,7 @@ interface MessageInterface
      * new protocol version.
      *
      * @param string $version HTTP protocol version
-     * @return self
+     * @return $this
      */
     public function withProtocolVersion(string $version): self;
 
@@ -191,11 +191,11 @@ interface MessageInterface
      *
      * @param string $name Case-insensitive header field name to add.
      * @param string|array<string> $value Header value(s).
-     * @return MessageInterface
+     * @return $this
      * @throws InvalidArgumentException for invalid header names.
      * @throws InvalidArgumentException for invalid header values.
      */
-    public function withAddedHeader(string $name, $value): MessageInterface;
+    public function withAddedHeader(string $name, $value): self;
 
     /**
      * Return an instance without the specified header.
@@ -207,9 +207,9 @@ interface MessageInterface
      * the named header.
      *
      * @param string $name Case-insensitive header field name to remove.
-     * @return MessageInterface
+     * @return $this
      */
-    public function withoutHeader(string $name): MessageInterface;
+    public function withoutHeader(string $name): self;
 
     /**
      * Gets the body of the message.
@@ -228,8 +228,8 @@ interface MessageInterface
      * new body stream.
      *
      * @param StreamInterface $body Body.
-     * @return MessageInterface
+     * @return $this
      * @throws InvalidArgumentException When the body is not valid.
      */
-    public function withBody(StreamInterface $body): MessageInterface;
+    public function withBody(StreamInterface $body): self;
 }

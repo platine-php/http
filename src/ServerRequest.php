@@ -72,7 +72,7 @@ class ServerRequest extends Request implements ServerRequestInterface
 
     /**
      * The array of uploaded files
-     * @var array<string, mixed>
+     * @var array<string|int, mixed|UploadedFileInterface>
      */
     protected array $uploadedFiles = [];
 
@@ -105,10 +105,10 @@ class ServerRequest extends Request implements ServerRequestInterface
 
     /**
      * Create instance using global variables
-     * @return ServerRequest
+     * @return static
      * @throws InvalidArgumentException
      */
-    public static function createFromGlobals(): ServerRequest
+    public static function createFromGlobals(): self
     {
         $method = $_POST['_method'] ?? $_SERVER['REQUEST_METHOD'] ?? 'GET';
 
@@ -130,6 +130,7 @@ class ServerRequest extends Request implements ServerRequestInterface
                 ->withParsedBody($_POST)
                 ->withCookieParams($_COOKIE)
                 ->withUploadedFiles($uploadedFiles);
+
 
         foreach ($_SERVER as $key => $value) {
             if (strpos($key, 'HTTP_') === 0) {
@@ -278,8 +279,8 @@ class ServerRequest extends Request implements ServerRequestInterface
 
     /**
      * Filter the uploaded files
-     * @param  array  $uploadedFiles the list of uploaded file
-     * @return array
+     * @param  array<int|string, UploadedFileInterface|mixed>  $uploadedFiles the list of uploaded file
+     * @return array<int|string, UploadedFileInterface>
      */
     protected function filterUploadedFiles(array $uploadedFiles): array
     {
@@ -297,7 +298,7 @@ class ServerRequest extends Request implements ServerRequestInterface
 
     /**
      * Filter the parsed body content
-     * @param  object|array|null $data the parsed body
+     * @param  object|array<string|int, mixed>|mixed|null $data the parsed body
      * @return mixed
      */
     protected function filterParsedBody($data)

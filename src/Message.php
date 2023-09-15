@@ -77,6 +77,7 @@ abstract class Message implements MessageInterface
 
     /**
      * {@inheritdoc}
+     * @return $this
      */
     public function withProtocolVersion(string $version): self
     {
@@ -133,6 +134,7 @@ abstract class Message implements MessageInterface
 
     /**
      * {@inheritdoc}
+     * @return $this
      */
     public function withHeader(string $name, $value): self
     {
