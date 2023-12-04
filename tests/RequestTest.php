@@ -120,13 +120,13 @@ class RequestTest extends PlatineTestCase
         $r = $r->withBody(new Stream('body'));
 
         $expected = <<<EOF
-GET / HTTP/1.1\r
-host: foo.bar\r
-cookie: foo=1;bar=2\r
-content-length: 4\r
-\r
+GET / HTTP/1.1
+host: foo.bar
+cookie: foo=1;bar=2
+content-length: 4
+
 body
 EOF;
-        $this->assertEquals($expected, $r->__toString());
+        $this->assertCommandOutput($expected, $r->__toString());
     }
 }

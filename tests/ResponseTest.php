@@ -76,13 +76,13 @@ class ResponseTest extends PlatineTestCase
         $r = $r->withBody(new Stream('body'));
 
         $expected = <<<EOF
-HTTP/1.1 200 OK\r
-host: foo.com, foo.bar, foo.baz\r
-set-cookie: foo=1;bar=2\r
-content-length: 4\r
-\r
+HTTP/1.1 200 OK
+host: foo.com, foo.bar, foo.baz
+set-cookie: foo=1;bar=2
+content-length: 4
+
 body
 EOF;
-        $this->assertEquals($expected, $r->__toString());
+        $this->assertCommandOutput($expected, $r->__toString());
     }
 }
