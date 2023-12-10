@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Platine\Test\Http;
 
-use Platine\Http\Uri;
+use InvalidArgumentException;
+use Platine\Dev\PlatineTestCase;
 use Platine\Http\ServerRequest;
 use Platine\Http\UploadedFile;
-use Platine\Http\Stream;
-use Platine\Dev\PlatineTestCase;
+use Platine\Http\Uri;
 
 /**
  * ServerRequest class tests
@@ -81,7 +81,7 @@ class ServerRequestTest extends PlatineTestCase
 
     public function testCreateFromGlobalsProtocolVersionIs11AndHostHeaderNotFound(): void
     {
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(InvalidArgumentException::class);
         $_SERVER['SERVER_PROTOCOL'] = 'HTTP/1.1';
         $sr = ServerRequest::createFromGlobals();
     }
@@ -113,7 +113,7 @@ class ServerRequestTest extends PlatineTestCase
         $this->assertArrayHasKey('foo', $sr->getParsedBody());
 
         //parsed body is not null,object,array
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(InvalidArgumentException::class);
         $sr = $sr->withParsedBody(1);
     }
 
@@ -147,7 +147,7 @@ class ServerRequestTest extends PlatineTestCase
 
     public function testWithAndGetUploadedFilesInvalidFileStructure(): void
     {
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(InvalidArgumentException::class);
         $sr = new ServerRequest();
         $sr = $sr->withUploadedFiles(array('foo' => 'bar'));
     }
