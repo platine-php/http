@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Platine\Test\Http\Client;
 
 use InvalidArgumentException;
+use org\bovigo\vfs\vfsStream;
 use Platine\Dev\PlatineTestCase;
 use Platine\Http\Client\Exception\HttpClientException;
 use Platine\Http\Client\HttpClient;
@@ -18,12 +19,37 @@ use Platine\Http\Client\HttpResponse;
  */
 class HttpClientTest extends PlatineTestCase
 {
+    protected $vfsRoot;
+    protected $vfsFileStreamPath;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        //need setup for each test
+        $this->vfsRoot = vfsStream::setup();
+        $this->vfsFileStreamPath = vfsStream::newDirectory('files_stream')->at($this->vfsRoot);
+    }
+
     public function testConstructEmptyBaseURL(): void
     {
         $o = new HttpClient();
         $this->assertEmpty($o->getBaseUrl());
         $o->setBaseUrl('http://localhost');
         $this->assertEquals($o->getBaseUrl(), 'http://localhost');
+    }
+
+    public function testDebug(): void
+    {
+        $o = new HttpClient();
+        $this->assertFalse($this->getPropertyValue(HttpClient::class, $o, 'debug'));
+        $this->assertNull($this->getPropertyValue(HttpClient::class, $o, 'debugStream'));
+
+        $file = $this->createVfsFile('stream_source_file', $this->vfsFileStreamPath, 'test');
+        $o->debug(true, fopen($file->url(), 'w+'));
+
+        $this->assertTrue($this->getPropertyValue(HttpClient::class, $o, 'debug'));
+        $this->assertIsResource($this->getPropertyValue(HttpClient::class, $o, 'debugStream'));
     }
 
     public function testConstructWithBaseURL(): void
@@ -232,6 +258,9 @@ class HttpClientTest extends PlatineTestCase
         $o->basicAuthentication('user', 'pwd');
         $o->header('lang', 'en');
         $o->cookie('sessionid', '12345678');
+
+        $file = $this->createVfsFile('stream_source_file', $this->vfsFileStreamPath, 'test');
+        $o->debug(true, fopen($file->url(), 'w+'));
 
         $res = $o->get('/foo/bar');
         $this->assertInstanceOf(HttpResponse::class, $res);

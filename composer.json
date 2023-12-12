@@ -40,7 +40,7 @@
     
     "autoload-dev": {
         "psr-4":{
-            "Platine\\Test\\": "tests"
+            "Platine\\Test\\Http\\": "tests"
         },
         "files": ["tests/fixtures/mocks.php"]
     },

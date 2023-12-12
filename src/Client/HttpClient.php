@@ -106,12 +106,38 @@ class HttpClient
     protected string $password = '';
 
     /**
+     * Whether to enable debugging
+     * @var bool
+     */
+    protected bool $debug = false;
+
+    /**
+     * The debug stream to use. If null will use STDERR
+     * @var resource|null
+     */
+    protected $debugStream = null;
+
+    /**
      * Create new instance
      * @param string $baseUrl
      */
     public function __construct(string $baseUrl = '')
     {
         $this->baseUrl = $baseUrl;
+    }
+
+    /**
+     * Enable debug
+     * @param bool $status
+     * @param resource|null $stream
+     * @return $this
+     */
+    public function debug(bool $status, $stream = null): self
+    {
+        $this->debug = $status;
+        $this->debugStream = $stream;
+
+        return $this;
     }
 
     /**
@@ -543,6 +569,14 @@ class HttpClient
         if (!empty($this->username)) {
             curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
             curl_setopt($ch, CURLOPT_USERPWD, sprintf('%s:%s', $this->username, $this->password));
+        }
+
+        if ($this->debug) {
+            curl_setopt($ch, CURLOPT_VERBOSE, true);
+        }
+
+        if ($this->debugStream !== null) {
+            curl_setopt($ch, CURLOPT_STDERR, $this->debugStream);
         }
 
         $response = curl_exec($ch);
