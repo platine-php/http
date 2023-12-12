@@ -260,7 +260,7 @@ class HttpClientTest extends PlatineTestCase
         $o->cookie('sessionid', '12345678');
 
         $file = $this->createVfsFile('stream_source_file', $this->vfsFileStreamPath, 'test');
-        $o->debug(true, fopen($file->url(), 'w+'));
+        $o->debug(true, STDERR);
 
         $res = $o->get('/foo/bar');
         $this->assertInstanceOf(HttpResponse::class, $res);
