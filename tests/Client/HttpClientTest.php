@@ -139,6 +139,33 @@ class HttpClientTest extends PlatineTestCase
         $this->assertEquals('header_value', $headers['header_name'][0]);
     }
 
+    public function testAddHeaderRemoveDuplicate(): void
+    {
+        $o = new HttpClient('http://localhost');
+        $o->header('header_name', 'header_value');
+        $o->header('header_name', 'header_value');
+        $headers = $o->getHeaders();
+
+        $this->assertCount(1, $headers);
+        $this->assertArrayHasKey('header_name', $headers);
+        $this->assertCount(1, $headers['header_name']);
+        $this->assertEquals('header_value', $headers['header_name'][0]);
+    }
+
+    public function testAddHeaderSameName(): void
+    {
+        $o = new HttpClient('http://localhost');
+        $o->header('header_name', 'header_value');
+        $o->header('header_name', 'header_value1');
+        $headers = $o->getHeaders();
+
+        $this->assertCount(1, $headers);
+        $this->assertArrayHasKey('header_name', $headers);
+        $this->assertCount(2, $headers['header_name']);
+        $this->assertEquals('header_value', $headers['header_name'][0]);
+        $this->assertEquals('header_value1', $headers['header_name'][1]);
+    }
+
     public function testAddHeaders(): void
     {
         $o = new HttpClient('http://localhost');

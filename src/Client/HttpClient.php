@@ -174,6 +174,9 @@ class HttpClient
         }
         $this->headers[$name][] = $value;
 
+        // Remove duplicate value
+        $this->headers[$name] = array_unique($this->headers[$name]);
+
         return $this;
     }
 
