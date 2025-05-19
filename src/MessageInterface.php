@@ -50,6 +50,9 @@ namespace Platine\Http;
 use InvalidArgumentException;
 
 /**
+ * @class MessageInterface
+ * @package Platine\Http
+ *
  * HTTP messages consist of requests from a client to a server and responses
  * from a server to a client. This interface defines the methods common to
  * each.
@@ -176,7 +179,7 @@ interface MessageInterface
      * @return $this
      * @throws InvalidArgumentException for invalid header names or values.
      */
-    public function withHeader(string $name, $value): self;
+    public function withHeader(string $name, string|array $value): self;
 
     /**
      * Return an instance with the specified header appended with the given value.
@@ -195,7 +198,7 @@ interface MessageInterface
      * @throws InvalidArgumentException for invalid header names.
      * @throws InvalidArgumentException for invalid header values.
      */
-    public function withAddedHeader(string $name, $value): self;
+    public function withAddedHeader(string $name, string|array $value): self;
 
     /**
      * Return an instance without the specified header.

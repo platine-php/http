@@ -47,7 +47,12 @@ declare(strict_types=1);
 
 namespace Platine\Http;
 
+use RuntimeException;
+
 /**
+ * @class StreamInterface
+ * @package Platine\Http
+ *
  * Describes a data stream.
  *
  * Typically, an instance will wrap a PHP stream; this interface provides
@@ -99,7 +104,7 @@ interface StreamInterface
      * Returns the current position of the file read/write pointer
      *
      * @return int Position of the file pointer
-     * @throws \RuntimeException on error.
+     * @throws RuntimeException on error.
      */
     public function tell(): int;
 
@@ -127,9 +132,9 @@ interface StreamInterface
      *     PHP $whence values for `fseek()`.  SEEK_SET: Set position equal to
      *     offset bytes SEEK_CUR: Set position to current location plus offset
      *     SEEK_END: Set position to end-of-stream plus offset.
-     * @throws \RuntimeException on failure.
+     * @throws RuntimeException on failure.
      */
-    public function seek(int $offset, $whence = SEEK_SET): void;
+    public function seek(int $offset, int $whence = SEEK_SET): void;
 
     /**
      * Seek to the beginning of the stream.
@@ -139,7 +144,7 @@ interface StreamInterface
      *
      * @see seek()
      * @see http://www.php.net/manual/en/function.fseek.php
-     * @throws \RuntimeException on failure.
+     * @throws RuntimeException on failure.
      */
     public function rewind(): void;
 
@@ -155,7 +160,7 @@ interface StreamInterface
      *
      * @param string $string The string that is to be written.
      * @return int Returns the number of bytes written to the stream.
-     * @throws \RuntimeException on failure.
+     * @throws RuntimeException on failure.
      */
     public function write(string $string): int;
 
@@ -174,7 +179,7 @@ interface StreamInterface
      *     call returns fewer bytes.
      * @return string Returns the data read from the stream, or an empty string
      *     if no bytes are available.
-     * @throws \RuntimeException if an error occurs.
+     * @throws RuntimeException if an error occurs.
      */
     public function read(int $length): string;
 
@@ -182,8 +187,8 @@ interface StreamInterface
      * Returns the remaining contents in a string
      *
      * @return string
-     * @throws \RuntimeException if unable to read.
-     * @throws \RuntimeException if error occurs while reading.
+     * @throws RuntimeException if unable to read.
+     * @throws RuntimeException if error occurs while reading.
      */
     public function getContents(): string;
 
@@ -194,10 +199,10 @@ interface StreamInterface
      * stream_get_meta_data() function.
      *
      * @see http://php.net/manual/en/function.stream-get-meta-data.php
-     * @param string $key Specific metadata to retrieve.
+     * @param string|null $key Specific metadata to retrieve.
      * @return array|mixed|null Returns an associative array if no key is
      *     provided. Returns a specific key value if a key is provided and the
      *     value is found, or null if the key is not found.
      */
-    public function getMetadata(string $key = null);
+    public function getMetadata(?string $key = null): mixed;
 }

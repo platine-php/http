@@ -37,7 +37,7 @@ use Exception;
 
 /**
  * @class HttpClientException
- * @package Platine\Http\Client
+ * @package Platine\Http\Client\Exception
  */
 class HttpClientException extends Exception
 {

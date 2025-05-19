@@ -50,22 +50,26 @@ namespace Platine\Http;
 
 use InvalidArgumentException;
 
+/**
+ * @class ServerRequest
+ * @package Platine\Http
+ */
 class ServerRequest extends Request implements ServerRequestInterface
 {
     /**
-     * The array of servers params
+     * The array of servers parameters
      * @var array<string, mixed>
      */
     protected array $serverParams = [];
 
     /**
-     * The array of cookie params
+     * The array of cookie parameters
      * @var array<string, mixed>
      */
     protected array $cookieParams = [];
 
     /**
-     * The array of query params
+     * The array of query parameters
      * @var array<string, mixed>
      */
     protected array $queryParams = [];
@@ -80,7 +84,7 @@ class ServerRequest extends Request implements ServerRequestInterface
      * The parse body content
      * @var object|array<string, mixed>|null
      */
-    protected $parsedBody;
+    protected object|array|null $parsedBody;
 
     /**
      * The array of request attributes
@@ -90,13 +94,13 @@ class ServerRequest extends Request implements ServerRequestInterface
 
     /**
      * Create new ServerRequest object
-     * @param string $method       the HTTP request method
+     * @param string $method the HTTP request method
      * @param UriInterface|string|null $uri
      * @param array<string, mixed>  $serverParams the array of server params
      */
     public function __construct(
         string $method = 'GET',
-        $uri = null,
+        UriInterface|string|null $uri = null,
         array $serverParams = []
     ) {
         $this->serverParams = $serverParams;
@@ -105,7 +109,7 @@ class ServerRequest extends Request implements ServerRequestInterface
 
     /**
      * Create instance using global variables
-     * @return static
+     * @return self
      * @throws InvalidArgumentException
      */
     public static function createFromGlobals(): self
@@ -221,7 +225,7 @@ class ServerRequest extends Request implements ServerRequestInterface
     /**
      * {@inheritdoc}
      */
-    public function getParsedBody()
+    public function getParsedBody(): array|object|null
     {
         return $this->parsedBody;
     }
@@ -229,10 +233,10 @@ class ServerRequest extends Request implements ServerRequestInterface
     /**
      * {@inheritdoc}
      */
-    public function withParsedBody($data): self
+    public function withParsedBody(array|object|null $data): self
     {
         $that = clone $this;
-        $that->parsedBody = $this->filterParsedBody($data);
+        $that->parsedBody = $data;
 
         return $that;
     }
@@ -248,7 +252,7 @@ class ServerRequest extends Request implements ServerRequestInterface
     /**
      * {@inheritdoc}
      */
-    public function getAttribute(string $name, $default = null)
+    public function getAttribute(string $name, mixed $default = null): mixed
     {
         return isset($this->attributes[$name]) ? $this->attributes[$name] : $default;
     }
@@ -256,7 +260,7 @@ class ServerRequest extends Request implements ServerRequestInterface
     /**
      * {@inheritdoc}
      */
-    public function withAttribute(string $name, $value): self
+    public function withAttribute(string $name, mixed $value): self
     {
         $that = clone $this;
         $that->attributes[$name] = $value;
@@ -288,25 +292,13 @@ class ServerRequest extends Request implements ServerRequestInterface
             if (is_array($uploadedFile)) {
                 $this->filterUploadedFiles($uploadedFile);
             } elseif (!$uploadedFile instanceof UploadedFileInterface) {
-                throw new InvalidArgumentException('Invalid structure of uploaded files tree, 
-                                                    each uploaded file must be an instance of UploadedFileInterface');
+                throw new InvalidArgumentException(
+                    'Invalid structure of uploaded files tree, each uploaded '
+                        . 'file must be an instance of UploadedFileInterface'
+                );
             }
         }
 
         return $uploadedFiles;
-    }
-
-    /**
-     * Filter the parsed body content
-     * @param  object|array<string|int, mixed>|mixed|null $data the parsed body
-     * @return mixed
-     */
-    protected function filterParsedBody($data)
-    {
-        if ($data !== null && !is_array($data) && !is_object($data)) {
-            throw new InvalidArgumentException('Invalid parsed body! Parsed body must be an array or an object');
-        }
-
-        return $data;
     }
 }

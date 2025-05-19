@@ -50,6 +50,9 @@ namespace Platine\Http;
 use InvalidArgumentException;
 
 /**
+ * @class ServerRequestInterface
+ * @package Platine\Http
+ *
  * Representation of an incoming, server-side HTTP request.
  *
  * Per the HTTP specification, this interface includes properties for
@@ -106,7 +109,7 @@ interface ServerRequestInterface extends RequestInterface
      * Retrieves cookies sent by the client to the server.
      *
      * The data MUST be compatible with the structure of the $_COOKIE
-     * superglobal.
+     * super global.
      *
      * @return array<string, mixed>
      */
@@ -115,12 +118,12 @@ interface ServerRequestInterface extends RequestInterface
     /**
      * Return an instance with the specified cookies.
      *
-     * The data IS NOT REQUIRED to come from the $_COOKIE superglobal, but MUST
+     * The data IS NOT REQUIRED to come from the $_COOKIE super global, but MUST
      * be compatible with the structure of $_COOKIE. Typically, this data will
      * be injected at instantiation.
      *
      * This method MUST NOT update the related Cookie header of the request
-     * instance, nor related values in the server params.
+     * instance, nor related values in the server parameters.
      *
      * This method MUST be implemented in such a way as to retain the
      * immutability of the message, and MUST return an instance that has the
@@ -138,9 +141,9 @@ interface ServerRequestInterface extends RequestInterface
      * Retrieves the deserialized query string arguments, if any.
      *
      * Note: the query params might not be in sync with the URI or server
-     * params. If you need to ensure you are only getting the original
+     * parameters. If you need to ensure you are only getting the original
      * values, you may need to parse the query string from `getUri()->getQuery()`
-     * or from the `QUERY_STRING` server param.
+     * or from the `QUERY_STRING` server parameter.
      *
      * @return array<string, mixed>
      */
@@ -151,14 +154,14 @@ interface ServerRequestInterface extends RequestInterface
      *
      * These values SHOULD remain immutable over the course of the incoming
      * request. They MAY be injected during instantiation, such as from PHP's
-     * $_GET superglobal, or MAY be derived from some other value such as the
+     * $_GET super global, or MAY be derived from some other value such as the
      * URI. In cases where the arguments are parsed from the URI, the data
      * MUST be compatible with what PHP's parse_str() would return for
      * purposes of how duplicate query parameters are handled, and how nested
      * sets are handled.
      *
      * Setting query string arguments MUST NOT change the URI stored by the
-     * request, nor the values in the server params.
+     * request, nor the values in the server parameters.
      *
      * This method MUST be implemented in such a way as to retain the
      * immutability of the message, and MUST return an instance that has the
@@ -180,7 +183,8 @@ interface ServerRequestInterface extends RequestInterface
      * These values MAY be prepared from $_FILES or the message body during
      * instantiation, or MAY be injected via withUploadedFiles().
      *
-     * @return array<string|int, mixed|UploadedFileInterface> An array tree of UploadedFileInterface instances; an empty
+     * @return array<string|int, mixed|UploadedFileInterface> An array tree of
+     * UploadedFileInterface instances; an empty
      *     array MUST be returned if no data is present.
      */
     public function getUploadedFiles(): array;
@@ -215,7 +219,7 @@ interface ServerRequestInterface extends RequestInterface
      * @return null|array<string, mixed>|object The deserialized body parameters, if any.
      *     These will typically be an array or object.
      */
-    public function getParsedBody();
+    public function getParsedBody(): array|object|null;
 
     /**
      * Return an instance with the specified body parameters.
@@ -239,7 +243,7 @@ interface ServerRequestInterface extends RequestInterface
      * immutability of the message, and MUST return an instance that has the
      * updated body parameters.
      *
-     * @param null|array<string|int, mixed>|object $data The deserialized body data. This will
+     * @param null|array<string, mixed>|object $data The deserialized body data. This will
      *     typically be in an array or object.
      *
      * @return self
@@ -247,7 +251,7 @@ interface ServerRequestInterface extends RequestInterface
      * @throws InvalidArgumentException if an unsupported argument type is
      *     provided.
      */
-    public function withParsedBody($data): self;
+    public function withParsedBody(array|object|null $data): self;
 
     /**
      * Retrieve attributes derived from the request.
@@ -277,7 +281,7 @@ interface ServerRequestInterface extends RequestInterface
      * @param mixed $default Default value to return if the attribute does not exist.
      * @return mixed|null
      */
-    public function getAttribute(string $name, $default = null);
+    public function getAttribute(string $name, mixed $default = null): mixed;
 
     /**
      * Return an instance with the specified derived request attribute.
@@ -296,7 +300,7 @@ interface ServerRequestInterface extends RequestInterface
      *
      * @return self
      */
-    public function withAttribute(string $name, $value): self;
+    public function withAttribute(string $name, mixed $value): self;
 
     /**
      * Return an instance that removes the specified derived request attribute.

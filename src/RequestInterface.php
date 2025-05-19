@@ -50,6 +50,9 @@ namespace Platine\Http;
 use InvalidArgumentException;
 
 /**
+ * @class RequestInterface
+ * @package Platine\Http
+ *
  * Representation of an outgoing, client-side request.
  *
  * Per the HTTP specification, this interface includes properties for
@@ -102,10 +105,10 @@ interface RequestInterface extends MessageInterface
      *
      * @see http://tools.ietf.org/html/rfc7230#section-5.3 (for the various
      *     request-target forms allowed in request messages)
-     * @param mixed $requestTarget
+     * @param string $requestTarget
      * @return RequestInterface
      */
-    public function withRequestTarget($requestTarget): RequestInterface;
+    public function withRequestTarget(string $requestTarget): RequestInterface;
 
     /**
      * Retrieves the HTTP method of the request.

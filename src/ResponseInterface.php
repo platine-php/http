@@ -47,7 +47,12 @@ declare(strict_types=1);
 
 namespace Platine\Http;
 
+use InvalidArgumentException;
+
 /**
+ * @class ResponseInterface
+ * @package Platine\Http
+ *
  * Representation of an outgoing, server-side response.
  *
  * Per the HTTP specification, this interface includes properties for
@@ -91,8 +96,8 @@ interface ResponseInterface extends MessageInterface
      * @param string $reasonPhrase The reason phrase to use with the
      *     provided status code; if none is provided, implementations MAY
      *     use the defaults as suggested in the HTTP specification.
-     * @return \Platine\Http\ResponseInterface
-     * @throws \InvalidArgumentException For invalid status code arguments.
+     * @return ResponseInterface
+     * @throws InvalidArgumentException For invalid status code arguments.
      */
     public function withStatus(int $code, string $reasonPhrase = ''): ResponseInterface;
 

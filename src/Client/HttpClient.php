@@ -47,6 +47,7 @@ declare(strict_types=1);
 
 namespace Platine\Http\Client;
 
+use CurlHandle;
 use InvalidArgumentException;
 use Platine\Http\Client\Exception\HttpClientException;
 use Platine\Stdlib\Helper\Json;
@@ -167,7 +168,7 @@ class HttpClient
      * @param mixed $value
      * @return $this
      */
-    public function header(string $name, $value): self
+    public function header(string $name, mixed $value): self
     {
         if (array_key_exists($name, $this->headers) === false) {
             $this->headers[$name] = [];
@@ -200,7 +201,7 @@ class HttpClient
      * @param mixed $value
      * @return $this
      */
-    public function parameter(string $name, $value): self
+    public function parameter(string $name, mixed $value): self
     {
         $this->parameters[$name] = $value;
 
@@ -228,7 +229,7 @@ class HttpClient
      * @param mixed $value
      * @return $this
      */
-    public function cookie(string $name, $value): self
+    public function cookie(string $name, mixed $value): self
     {
         $this->cookies[$name] = $value;
 
@@ -442,10 +443,10 @@ class HttpClient
     /**
      * Execute the request as a POST request to the specified path
      * @param string $path
-     * @param mixed|null $body the request body
+     * @param mixed $body the request body
      * @return HttpResponse
      */
-    public function post(string $path = '', $body = null): HttpResponse
+    public function post(string $path = '', mixed $body = null): HttpResponse
     {
         return $this->request($path, HttpMethod::POST, $body);
     }
@@ -453,10 +454,10 @@ class HttpClient
     /**
      * Execute the request as a PUT request to the specified path
      * @param string $path
-     * @param mixed|null $body the request body
+     * @param mixed $body the request body
      * @return HttpResponse
      */
-    public function put(string $path = '', $body = null): HttpResponse
+    public function put(string $path = '', mixed $body = null): HttpResponse
     {
         return $this->request($path, HttpMethod::PUT, $body);
     }
@@ -464,10 +465,10 @@ class HttpClient
     /**
      * Execute the request as a DELETE request to the specified path
      * @param string $path
-     * @param mixed|null $body the request body
+     * @param mixed $body the request body
      * @return HttpResponse
      */
-    public function delete(string $path = '', $body = null): HttpResponse
+    public function delete(string $path = '', mixed $body = null): HttpResponse
     {
         return $this->request($path, HttpMethod::DELETE, $body);
     }
@@ -475,10 +476,10 @@ class HttpClient
     /**
      * Execute the request as a HEAD request to the specified path
      * @param string $path
-     * @param mixed|null $body the request body
+     * @param mixed $body the request body
      * @return HttpResponse
      */
-    public function head(string $path = '', $body = null): HttpResponse
+    public function head(string $path = '', mixed $body = null): HttpResponse
     {
         return $this->request($path, HttpMethod::HEAD, $body);
     }
@@ -486,10 +487,10 @@ class HttpClient
     /**
      * Execute the request as a TRACE request to the specified path
      * @param string $path
-     * @param mixed|null $body the request body
+     * @param mixed $body the request body
      * @return HttpResponse
      */
-    public function trace(string $path = '', $body = null): HttpResponse
+    public function trace(string $path = '', mixed $body = null): HttpResponse
     {
         return $this->request($path, HttpMethod::TRACE, $body);
     }
@@ -497,10 +498,10 @@ class HttpClient
     /**
      * Execute the request as a OPTIONS request to the specified path
      * @param string $path
-     * @param mixed|null $body the request body
+     * @param mixed $body the request body
      * @return HttpResponse
      */
-    public function options(string $path = '', $body = null): HttpResponse
+    public function options(string $path = '', mixed $body = null): HttpResponse
     {
         return $this->request($path, HttpMethod::OPTIONS, $body);
     }
@@ -508,10 +509,10 @@ class HttpClient
     /**
      * Execute the request as a CONNECT request to the specified path
      * @param string $path
-     * @param mixed|null $body the request body
+     * @param mixed $body the request body
      * @return HttpResponse
      */
-    public function connect(string $path = '', $body = null): HttpResponse
+    public function connect(string $path = '', mixed $body = null): HttpResponse
     {
         return $this->request($path, HttpMethod::CONNECT, $body);
     }
@@ -520,11 +521,14 @@ class HttpClient
      * Construct the HTTP request and sends it using the provided method and request body
      * @param string $path
      * @param string $method
-     * @param mixed|null $body
+     * @param mixed $body
      * @return HttpResponse
      */
-    public function request(string $path, string $method = HttpMethod::GET, $body = null): HttpResponse
-    {
+    public function request(
+        string $path,
+        string $method = HttpMethod::GET,
+        mixed $body = null
+    ): HttpResponse {
         $ch = curl_init();
 
         $this->processUrl($path, $ch);
@@ -541,10 +545,10 @@ class HttpClient
 
     /**
      * Send the request
-     * @param mixed $ch the cURL handle
+     * @param CurlHandle $ch the cURL handle
      * @return HttpResponse
      */
-    protected function send($ch): HttpResponse
+    protected function send(CurlHandle $ch): HttpResponse
     {
         $responseHeaders = [];
         curl_setopt($ch, CURLOPT_HEADERFUNCTION, function ($curl, $header) use (&$responseHeaders) {
@@ -596,10 +600,10 @@ class HttpClient
     /**
      * Process URL
      * @param string $path
-     * @param mixed $ch the cURL handle
+     * @param CurlHandle $ch the cURL handle
      * @return void
      */
-    protected function processUrl(string $path, $ch): void
+    protected function processUrl(string $path, CurlHandle $ch): void
     {
         $url = $this->buildUrl($path);
         curl_setopt($ch, CURLOPT_URL, $url);
@@ -637,10 +641,10 @@ class HttpClient
 
     /**
      * Process the request headers
-     * @param mixed $ch the cURL handle
+     * @param CurlHandle $ch the cURL handle
      * @return void
      */
-    protected function processHeaders($ch): void
+    protected function processHeaders(CurlHandle $ch): void
     {
         $headers = [];
         foreach ($this->headers as $name => $values) {
@@ -656,10 +660,10 @@ class HttpClient
 
     /**
      * Process the request cookies
-     * @param mixed $ch the cURL handle
+     * @param CurlHandle $ch the cURL handle
      * @return void
      */
-    protected function processCookies($ch): void
+    protected function processCookies(CurlHandle $ch): void
     {
         $cookies = [];
         foreach ($this->cookies as $name => $value) {
@@ -672,11 +676,11 @@ class HttpClient
 
     /**
      * Process the request body
-     * @param mixed $ch the cURL handle
+     * @param CurlHandle $ch the cURL handle
      * @param array<mixed>|object|null $body the request body
      * @return void
      */
-    protected function processBody($ch, $body = null): void
+    protected function processBody(CurlHandle $ch, array|object|null $body = null): void
     {
         if ($body === null) {
             return;

@@ -27,6 +27,14 @@ class ResponseTest extends PlatineTestCase
         $this->assertEquals('OK', $resp->getReasonPhrase());
     }
 
+    public function testConstructorReasonPhraseIsEmpty(): void
+    {
+        //Default
+        $resp = new Response(418);
+        $this->assertEquals(418, $resp->getStatusCode());
+        $this->assertEmpty($resp->getReasonPhrase());
+    }
+
     public function testWithAndGetStatusCode(): void
     {
         $resp = new Response();
@@ -39,6 +47,10 @@ class ResponseTest extends PlatineTestCase
         $resp = $resp->withStatus(401, 'Not authorized');
         $this->assertEquals(401, $resp->getStatusCode());
         $this->assertEquals('Not authorized', $resp->getReasonPhrase());
+
+        $resp = $resp->withStatus(418, '');
+        $this->assertEquals(418, $resp->getStatusCode());
+        $this->assertEmpty($resp->getReasonPhrase());
 
         //invalid status code
         $this->expectException(InvalidArgumentException::class);

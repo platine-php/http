@@ -50,6 +50,10 @@ namespace Platine\Http;
 use InvalidArgumentException;
 use RuntimeException;
 
+/**
+ * @class UploadedFile
+ * @package Platine\Http
+ */
 class UploadedFile implements UploadedFileInterface
 {
     /**
@@ -80,7 +84,7 @@ class UploadedFile implements UploadedFileInterface
      *  The uploaded file error
      * @var int
      */
-    protected int $error = \UPLOAD_ERR_OK;
+    protected int $error = UPLOAD_ERR_OK;
 
     /**
      * The uploaded file client name
@@ -104,14 +108,14 @@ class UploadedFile implements UploadedFileInterface
      * @param string|null $clientMediaType
      */
     public function __construct(
-        $filenameOrStream,
+        string|StreamInterface $filenameOrStream,
         ?int $size = null,
-        int $error = \UPLOAD_ERR_OK,
+        int $error = UPLOAD_ERR_OK,
         ?string $clientFilename = null,
         ?string $clientMediaType = null
     ) {
         if ($filenameOrStream instanceof StreamInterface) {
-            if (!$filenameOrStream->isReadable()) {
+            if ($filenameOrStream->isReadable() === false) {
                 throw new InvalidArgumentException('Stream is not readable');
             }
             $this->stream = $filenameOrStream;
@@ -273,21 +277,21 @@ class UploadedFile implements UploadedFileInterface
     }
 
     /**
-     * Filter the uploded file error
+     * Filter the uploaded file error
      * @param  int  $error
      * @return int
      */
     protected function filterError(int $error): int
     {
         $validErrors = [
-            \UPLOAD_ERR_OK,
-            \UPLOAD_ERR_INI_SIZE,
-            \UPLOAD_ERR_FORM_SIZE,
-            \UPLOAD_ERR_PARTIAL,
-            \UPLOAD_ERR_NO_FILE,
-            \UPLOAD_ERR_NO_TMP_DIR,
-            \UPLOAD_ERR_CANT_WRITE,
-            \UPLOAD_ERR_EXTENSION
+            UPLOAD_ERR_OK,
+            UPLOAD_ERR_INI_SIZE,
+            UPLOAD_ERR_FORM_SIZE,
+            UPLOAD_ERR_PARTIAL,
+            UPLOAD_ERR_NO_FILE,
+            UPLOAD_ERR_NO_TMP_DIR,
+            UPLOAD_ERR_CANT_WRITE,
+            UPLOAD_ERR_EXTENSION
         ];
 
         if (!in_array($error, $validErrors)) {
@@ -298,7 +302,7 @@ class UploadedFile implements UploadedFileInterface
     }
 
     /**
-     * Filter the uploded file target path
+     * Filter the uploaded file target path
      * @param  string    $targetPath
      * @return string
      */

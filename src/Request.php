@@ -47,6 +47,8 @@ declare(strict_types=1);
 
 namespace Platine\Http;
 
+use InvalidArgumentException;
+
 /**
  * @class Request
  * @package Platine\Http
@@ -67,7 +69,7 @@ class Request extends Message implements RequestInterface
 
     /**
      * The request Uri
-     * @var UriInterface
+     * @var UriInterface|null
      */
     protected ?UriInterface $uri;
 
@@ -76,8 +78,10 @@ class Request extends Message implements RequestInterface
      * @param string $method the HTTP request method
      * @param UriInterface|string|null $uri    the request Uri
      */
-    public function __construct(string $method = 'GET', $uri = null)
-    {
+    public function __construct(
+        string $method = 'GET',
+        UriInterface|string|null $uri = null
+    ) {
         $this->method = $this->filterMethod($method);
         if ($uri === null) {
             $uri = new Uri();
@@ -96,7 +100,7 @@ class Request extends Message implements RequestInterface
      */
     public function getRequestTarget(): string
     {
-        if ($this->requestTarget !== null && $this->requestTarget !== '') {
+        if ($this->requestTarget !== '') {
             return $this->requestTarget;
         }
 
@@ -117,7 +121,7 @@ class Request extends Message implements RequestInterface
     /**
      * {@inheritdoc}
      */
-    public function withRequestTarget($requestTarget): self
+    public function withRequestTarget(string $requestTarget): self
     {
         $that = clone $this;
         $that->requestTarget = $requestTarget;
@@ -240,7 +244,7 @@ class Request extends Message implements RequestInterface
     protected function filterMethod(string $method): string
     {
         if (!preg_match('/^[!#$%&\'*+\-.^_`|~0-9a-zA-Z]+$/', $method)) {
-            throw new \InvalidArgumentException(sprintf(
+            throw new InvalidArgumentException(sprintf(
                 'HTTP Method %s must be compliant with '
                                     . 'the "RFC 7230" standart',
                 $method

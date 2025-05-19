@@ -157,7 +157,7 @@ interface UriInterface
      *
      * The path can either be empty or absolute (starting with a slash) or
      * rootless (not starting with a slash). Implementations MUST support all
-     * three syntaxes.
+     * three syntax's.
      *
      * Normally, the empty path "" and absolute path "/" are considered equal as
      * defined in RFC 7230 Section 2.7.3. But this method MUST NOT automatically
@@ -251,7 +251,7 @@ interface UriInterface
      * @param null|string $password The password associated with $user.
      * @return \Platine\Http\UriInterface A new instance with the specified user information.
      */
-    public function withUserInfo(string $user, string $password = null): UriInterface;
+    public function withUserInfo(string $user, ?string $password = null): UriInterface;
 
     /**
      * Return an instance with the specified host.

@@ -47,6 +47,10 @@ declare(strict_types=1);
 
 namespace Platine\Http;
 
+/**
+ * @class Message
+ * @package Platine\Http
+ */
 abstract class Message implements MessageInterface
 {
     /**
@@ -63,7 +67,7 @@ abstract class Message implements MessageInterface
 
     /**
      * The message body.
-     * @var StreamInterface
+     * @var StreamInterface|null
      */
     protected ?StreamInterface $body = null;
 
@@ -136,7 +140,7 @@ abstract class Message implements MessageInterface
      * {@inheritdoc}
      * @return $this
      */
-    public function withHeader(string $name, $value): self
+    public function withHeader(string $name, string|array $value): self
     {
         $that = clone $this;
         $lowerName = strtolower($name);
@@ -148,7 +152,7 @@ abstract class Message implements MessageInterface
     /**
      * {@inheritdoc}
      */
-    public function withAddedHeader(string $name, $value): self
+    public function withAddedHeader(string $name, string|array $value): self
     {
         $that = clone $this;
         $lowerName = strtolower($name);

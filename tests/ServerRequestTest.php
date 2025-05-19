@@ -111,10 +111,6 @@ class ServerRequestTest extends PlatineTestCase
 
         $this->assertNotEmpty($sr->getParsedBody());
         $this->assertArrayHasKey('foo', $sr->getParsedBody());
-
-        //parsed body is not null,object,array
-        $this->expectException(InvalidArgumentException::class);
-        $sr = $sr->withParsedBody(1);
     }
 
     public function testWithAndGetAttributes(): void

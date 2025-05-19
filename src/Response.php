@@ -49,6 +49,10 @@ namespace Platine\Http;
 
 use InvalidArgumentException;
 
+/**
+ * @class Response
+ * @package Platine\Http
+ */
 class Response extends Message implements ResponseInterface
 {
     /**
@@ -155,9 +159,7 @@ class Response extends Message implements ResponseInterface
     {
         $this->statusCode = $this->filterStatusCode($statusCode);
         if ($reasonPhrase === '') {
-            $reasonPhrase = isset(static::REASON_PHRASES[$this->statusCode])
-                    ? static::REASON_PHRASES[$this->statusCode]
-                    : '';
+            $reasonPhrase = static::REASON_PHRASES[$this->statusCode] ?? '';
         }
         $this->reasonPhrase = $reasonPhrase;
     }
@@ -179,9 +181,7 @@ class Response extends Message implements ResponseInterface
         $that->statusCode = $this->filterStatusCode($code);
 
         if ($reasonPhrase === '') {
-            $reasonPhrase = isset(static::REASON_PHRASES[$that->statusCode])
-                    ? static::REASON_PHRASES[$that->statusCode]
-                    : '';
+            $reasonPhrase = static::REASON_PHRASES[$that->statusCode] ?? '';
         }
         $that->reasonPhrase = $reasonPhrase;
 

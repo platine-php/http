@@ -51,6 +51,10 @@ use Exception;
 use InvalidArgumentException;
 use RuntimeException;
 
+/**
+ * @class Stream
+ * @package Platine\Http
+ */
 class Stream implements StreamInterface
 {
     /**
@@ -99,27 +103,37 @@ class Stream implements StreamInterface
      * @param string $mode    the stream mode
      * @param array<string, mixed>  $options the stream options
      */
-    public function __construct($content = '', string $mode = 'r+', array $options = [])
-    {
+    public function __construct(
+        $content = '',
+        string $mode = 'r+',
+        array $options = []
+    ) {
         if (is_string($content)) {
             if (is_file($content) || strpos($content, 'php://') === 0) {
                 $mode = $this->filterMode($mode);
                 $resource = fopen($content, $mode);
                 if ($resource === false) {
-                    throw new RuntimeException(sprintf('Unable to create a stream from file [%s] !', $content));
+                    throw new RuntimeException(sprintf(
+                        'Unable to create a stream from file [%s] !',
+                        $content
+                    ));
                 }
                 $this->resource = $resource;
             } else {
                 $resource = fopen('php://temp', 'r+');
                 if ($resource === false || fwrite($resource, $content) === false) {
-                    throw new RuntimeException('Unable to create a stream from string');
+                    throw new RuntimeException(
+                        'Unable to create a stream from string'
+                    );
                 }
                 $this->resource = $resource;
             }
         } elseif (is_resource($content)) {
             $this->resource = $content;
         } else {
-            throw new InvalidArgumentException('Stream resource must be valid PHP resource');
+            throw new InvalidArgumentException(
+                'Stream resource must be valid PHP resource'
+            );
         }
 
         if (isset($options['size']) && is_int($options['size']) && $options['size'] >= 0) {
@@ -249,7 +263,7 @@ class Stream implements StreamInterface
     /**
      * {@inheritdoc}
      */
-    public function seek(int $offset, $whence = SEEK_SET): void
+    public function seek(int $offset, int $whence = SEEK_SET): void
     {
         if ($this->resource === null) {
             throw new RuntimeException('Stream resource is detached');
@@ -304,6 +318,7 @@ class Stream implements StreamInterface
         } else {
             $this->size = !empty($fstat['size']) ? $fstat['size'] : null;
         }
+
         return $bytes;
     }
 
@@ -361,7 +376,7 @@ class Stream implements StreamInterface
     /**
      * {@inheritdoc}
      */
-    public function getMetadata(string $key = null)
+    public function getMetadata(?string $key = null): mixed
     {
         if ($this->resource === null) {
             throw new RuntimeException('Stream resource is detached');
@@ -382,9 +397,7 @@ class Stream implements StreamInterface
      */
     protected function filterMode(string $mode): string
     {
-        if (
-                !in_array($mode, static::MODES_WRITE) && !in_array($mode, static::MODES_READ)
-        ) {
+        if (!in_array($mode, static::MODES_WRITE) && !in_array($mode, static::MODES_READ)) {
             throw new InvalidArgumentException(sprintf('Invalid mode %s', $mode));
         }
         return $mode;

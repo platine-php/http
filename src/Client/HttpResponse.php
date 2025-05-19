@@ -120,7 +120,7 @@ class HttpResponse
     public function __construct(
         array $requestInfo,
         array $headers,
-        $response,
+        mixed $response,
         string $error
     ) {
         $this->url = $requestInfo['url'];
@@ -187,9 +187,9 @@ class HttpResponse
     /**
      * Return the HTTP header
      * @param string $name
-     * @return mixed|null
+     * @return mixed
      */
-    public function getHeader(string $name)
+    public function getHeader(string $name): mixed
     {
         return $this->headers[$name] ?? null;
     }
@@ -251,7 +251,7 @@ class HttpResponse
         bool $assoc = false,
         int $depth = 512,
         int $options = 0
-    ) {
+    ): array|object {
         return Json::decode($this->content, $assoc, $depth, $options);
     }
 
@@ -259,7 +259,7 @@ class HttpResponse
      * Return the response as XML
      * @return mixed
      */
-    public function xml()
+    public function xml(): mixed
     {
         return Xml::decode($this->content);
     }

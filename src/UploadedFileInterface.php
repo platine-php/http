@@ -51,6 +51,9 @@ use InvalidArgumentException;
 use RuntimeException;
 
 /**
+ * @class UploadedFileInterface
+ * @package Platine\Http
+ *
  * Value object representing a file uploaded through an HTTP request.
  *
  * Instances of this interface are considered immutable; all methods that
