@@ -238,7 +238,7 @@ class HttpClient
 
     /**
      * Add multiple request cookie
-     * @param array<string, mixed> $cookies
+     * @param array<string, mixed>|null $cookies
      * @return $this
      */
     public function cookies(?array $cookies = null): self
