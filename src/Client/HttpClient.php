@@ -339,7 +339,7 @@ class HttpClient
      * Set the request content type as multipart
      * @return $this
      */
-    public function mutlipart(): self
+    public function multipart(): self
     {
         $this->contentType('multipart/form-data');
 

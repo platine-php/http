@@ -395,7 +395,7 @@ class HttpClientTest extends PlatineTestCase
         $o->basicAuthentication('user', 'pwd');
         $o->header('lang', 'en');
         $o->cookie('sessionid', '12345678');
-        $o->mutlipart();
+        $o->multipart();
 
         $res = $o->post('/foo/bar', ['age' => 12, 'foo' => ['data' => 'filedata', 'filename' => 'photo.png']]);
         $this->assertInstanceOf(HttpResponse::class, $res);
