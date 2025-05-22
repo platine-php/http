@@ -520,7 +520,7 @@ class HttpClient
     /**
      * Construct the HTTP request and sends it using the provided method and request body
      * @param string $path
-     * @param string $method
+     * @param non-empty-string $method
      * @param mixed $body
      * @return HttpResponse
      */
@@ -605,6 +605,7 @@ class HttpClient
      */
     protected function processUrl(string $path, CurlHandle $ch): void
     {
+        /** @var non-empty-string $url */
         $url = $this->buildUrl($path);
         curl_setopt($ch, CURLOPT_URL, $url);
     }
