@@ -733,10 +733,15 @@ class HttpClient
             if (is_array($value)) {
                 $data = $value['data'];
                 $filename = $value['filename'] ?? false;
+                $mimetype = $value['mimetype'] ?? false;
 
                 $body .= sprintf("--%s\nContent-Disposition: form-data; name=\"%s\"", $boundary, $name);
                 if ($filename !== false) {
                     $body .= sprintf(";filename=\"%s\"", $filename);
+                }
+
+                if ($mimetype !== false) {
+                    $body .= sprintf("\nContent-Type: \"%s\"", $mimetype);
                 }
 
                 $body .= sprintf("\n\n%s\n", $data);

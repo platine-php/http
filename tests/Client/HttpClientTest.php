@@ -397,7 +397,11 @@ class HttpClientTest extends PlatineTestCase
         $o->cookie('sessionid', '12345678');
         $o->multipart();
 
-        $res = $o->post('/foo/bar', ['age' => 12, 'foo' => ['data' => 'filedata', 'filename' => 'photo.png']]);
+        $res = $o->post(
+            '/foo/bar',
+            [
+                'age' => 12, 'foo' => ['mimetype' => 'text/plain', 'data' => 'filedata', 'filename' => 'photo.png']]
+        );
         $this->assertInstanceOf(HttpResponse::class, $res);
     }
 
