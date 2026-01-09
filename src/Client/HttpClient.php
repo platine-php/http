@@ -678,10 +678,10 @@ class HttpClient
     /**
      * Process the request body
      * @param CurlHandle $ch the cURL handle
-     * @param array<mixed>|object|null $body the request body
+     * @param array<mixed>|object|string|null $body the request body
      * @return void
      */
-    protected function processBody(CurlHandle $ch, array|object|null $body = null): void
+    protected function processBody(CurlHandle $ch, array|object|string|null $body = null): void
     {
         if ($body === null) {
             return;
@@ -695,7 +695,7 @@ class HttpClient
                 $body = http_build_query($body);
             } elseif (stripos($contentType, 'multipart/form-data') !== false) {
                 $boundary = $this->parseBoundaryFromContentType($contentType);
-                $body = $this->buildMultipartBody(/** @var array<mixed> $body */ $body, $boundary);
+                $body = $this->buildMultipartBody(/** @var array<mixed> $body */ (array) $body, $boundary);
             }
         }
 
