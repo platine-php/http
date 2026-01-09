@@ -129,7 +129,7 @@ class HttpResponse
         $this->cookies = $this->processCookies($headers);
 
         if ($response !== false) {
-            $this->contentType = $requestInfo['content_type'];
+            $this->contentType = $requestInfo['content_type'] ?? '';
             $this->headerSize = (int) $requestInfo['header_size'];
             $this->contentLength = (int) ($requestInfo['content_length'] ?? (strlen($response) - $this->headerSize));
             $this->content = $this->processContent($response, $this->headerSize);
