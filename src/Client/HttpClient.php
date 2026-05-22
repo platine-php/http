@@ -824,11 +824,10 @@ class HttpClient
         }
 
         curl_setopt($ch, CURLOPT_UPLOAD, true);
-        curl_setopt($ch, CURLOPT_INFILE, $fp);
-        curl_setopt($ch, CURLOPT_INFILESIZE, (int) filesize($filePath));
         curl_setopt($ch, CURLOPT_READFUNCTION, function ($curl, $fd, $length) use ($fp) {
             return fread($fp, $length);
         });
+        curl_setopt($ch, CURLOPT_INFILESIZE, (int) filesize($filePath));
 
         $this->tempFiles[] = $fp;
     }
