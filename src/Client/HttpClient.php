@@ -899,25 +899,33 @@ class HttpClient
         }
 
         if (is_array($file)) {
-            $tempFile = tmpfile();
-            fwrite($tempFile, $file['data']);
-            $metaData = stream_get_meta_data($tempFile);
-
-            /* This is just to fix PHPStan complaining as normally "uri" will be returned for
-             the tmpfile() */
-            /** @var string $uri */
-            $uri = $metaData['uri'] ?? '';
+            $tempPath = $this->createTempFile($file['data']);
 
             $curlFile = new CURLFile(
-                $uri,
+                $tempPath,
                 $file['mimetype'],
                 $file['filename']
             );
 
-            $this->tempFiles[] = $tempFile;
             return $curlFile;
         }
 
         throw new InvalidArgumentException('Invalid file source');
+    }
+
+    /**
+     * Create temporary file
+     * @param string $data
+     * @return string
+     */
+    protected function createTempFile(string $data): string
+    {
+        $tempDir = sys_get_temp_dir();
+        $tempFile = tempnam($tempDir, 'curl_');
+
+        file_put_contents($tempFile, $data);
+
+
+        return $tempFile;
     }
 }
