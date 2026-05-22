@@ -40,9 +40,14 @@ function curl_getinfo($ch)
 function curl_setopt($ch, int $option, $value)
 {
     global $mock_curl_setopt_closure;
-    if ($mock_curl_setopt_closure && is_callable($value)) {
-        // TODO
-        $value($ch, 'header:value');
+    if ($mock_curl_setopt_closure) {
+        if ($option === CURLOPT_READFUNCTION) {
+            $value($ch, 'header:value', 45);
+        }
+
+        if ($option === CURLOPT_HEADERFUNCTION) {
+            $value($ch, 'header:value');
+        }
     }
 
     return \curl_setopt($ch, $option, $value);
@@ -124,8 +129,13 @@ function parse_url(string $url, int $component = -1)
     }
 }
 
-function preg_match(string $pattern, string $subject, array &$matches = null, int $flags = 0, int $offset = 0)
-{
+function preg_match(
+    string $pattern,
+    string $subject,
+    array &$matches = null,
+    int $flags = 0,
+    int $offset = 0
+) {
     global $mock_preg_match_to_false, $mock_preg_match_to_true;
     if ($mock_preg_match_to_false) {
         return false;

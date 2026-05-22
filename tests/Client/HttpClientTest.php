@@ -456,9 +456,10 @@ class HttpClientTest extends PlatineTestCase
 
     public function testFileUploadAsRequestBody(): void
     {
-        global $mock_curl_exec, $mock_curl_getinfo;
+        global $mock_curl_exec, $mock_curl_getinfo, $mock_curl_setopt_closure;
         $mock_curl_exec = true;
         $mock_curl_getinfo = true;
+        $mock_curl_setopt_closure = true;
 
         $file = $this->createVfsFile('stream_source_file', $this->vfsFileStreamPath, 'test');
 

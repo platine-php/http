@@ -813,16 +813,22 @@ class HttpClient
      */
     protected function handleDirectFileBody(CurlHandle $ch, CURLFile $curlFile): void
     {
-        $filename = $curlFile->getFilename();
-        $fp = fopen($filename, 'rb');
-        if ($fp === false) {
-            throw new RuntimeException(sprintf('Can not open file [%s]', $filename));
+        if (!isset($this->headers['Content-Type'][0])) {
+            $this->contentType('application/octet-stream');
         }
-        $size = (int) filesize($filename);
+        $filePath = $curlFile->getFilename();
 
-        curl_setopt($ch, CURLOPT_PUT, true);
+        $fp = fopen($filePath, 'rb');
+        if ($fp === false) {
+            throw new RuntimeException(sprintf('Can not open file [%s]', $filePath));
+        }
+
+        curl_setopt($ch, CURLOPT_UPLOAD, true);
         curl_setopt($ch, CURLOPT_INFILE, $fp);
-        curl_setopt($ch, CURLOPT_INFILESIZE, $size);
+        curl_setopt($ch, CURLOPT_INFILESIZE, (int) filesize($filePath));
+        curl_setopt($ch, CURLOPT_READFUNCTION, function ($curl, $fd, $length) use ($fp) {
+            return fread($fp, $length);
+        });
 
         $this->tempFiles[] = $fp;
     }
