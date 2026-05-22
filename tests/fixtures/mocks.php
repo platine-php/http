@@ -9,6 +9,17 @@ $mock_curl_exec = false;
 $mock_curl_error = false;
 $mock_curl_getinfo = false;
 $mock_curl_setopt_closure = false;
+$mock_fopen = false;
+
+function fopen($filename, $mode)
+{
+    global $mock_fopen;
+    if ($mock_fopen) {
+        return false;
+    }
+
+    return \fopen($filename, $mode);
+}
 
 function curl_getinfo($ch)
 {

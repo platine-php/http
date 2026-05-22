@@ -47,10 +47,12 @@ declare(strict_types=1);
 
 namespace Platine\Http\Client;
 
+use CURLFile;
 use CurlHandle;
 use InvalidArgumentException;
 use Platine\Http\Client\Exception\HttpClientException;
 use Platine\Stdlib\Helper\Json;
+use RuntimeException;
 
 /**
  * @class HttpClient
@@ -81,6 +83,24 @@ class HttpClient
      * @var array<string, mixed>
      */
     protected array $cookies = [];
+
+    /**
+     * Multipart files
+     * @var array<string, CURLFile|array<CURLFile>>
+     */
+    protected array $files = [];
+
+    /**
+     * File for direct upload (as request body)
+     * @var CURLFile|null
+     */
+    protected ?CURLFile $directFile = null;
+
+    /**
+     * Temporary files to be clear later on destruct
+     * @var array<resource>
+     */
+    protected array $tempFiles = [];
 
     /**
      * Indicating the number of seconds to use as a timeout for HTTP requests
@@ -125,6 +145,18 @@ class HttpClient
     public function __construct(string $baseUrl = '')
     {
         $this->baseUrl = $baseUrl;
+    }
+
+    /**
+     * Destructor
+     */
+    public function __destruct()
+    {
+        foreach ($this->tempFiles as $tempFile) {
+            if (is_resource($tempFile)) {
+                fclose($tempFile);
+            }
+        }
     }
 
     /**
@@ -255,6 +287,49 @@ class HttpClient
     }
 
     /**
+     * Add file for direct upload (as request body)
+     * @param string|array{data:string, filename:string, mimetype:string}|CURLFile $file
+     * @return $this
+     */
+    public function addFileAsBody(string|array|CURLFile $file): self
+    {
+        $this->directFile = $this->createCurlFile($file);
+        return $this;
+    }
+
+    /**
+     * Add multipart file
+     * @param string $name
+     * @param string|array{data:string, filename:string, mimetype:string}|CURLFile $file
+     * @return $this
+     */
+    public function addFile(
+        string $name,
+        string|array|CURLFile $file
+    ): self {
+        $this->files[$name] = $this->createCurlFile($file);
+        return $this;
+    }
+
+    /**
+     * Add multiple multipart file
+     * @param string $name
+     * @param array<string|array{data:string, filename:string, mimetype:string}|CURLFile> $files
+     * @return $this
+     */
+    public function addFiles(string $name, array $files): self
+    {
+        $list = [];
+        foreach ($files as $index => $file) {
+            $list[$index] = $this->createCurlFile($file);
+        }
+
+        $this->files[$name] = $list;
+
+        return $this;
+    }
+
+    /**
      * Set the basic authentication to use on the request
      * @param string $usename
      * @param string $password
@@ -300,16 +375,6 @@ class HttpClient
      */
     public function contentType(string $contentType): self
     {
-       // If this is a multipart request and boundary was not defined,
-       // we define a boundary as this is required for multipart requests.
-        if (stripos($contentType, 'multipart/') !== false) {
-            if (stripos($contentType, 'boundary') === false) {
-                $contentType .= sprintf('; boundary="%s"', uniqid((string) time()));
-                // remove double semi-colon, except after scheme
-                $contentType = preg_replace('/(.)(;{2,})/', '$1;', $contentType);
-            }
-        }
-
         return $this->header('Content-Type', $contentType);
     }
 
@@ -368,6 +433,17 @@ class HttpClient
     }
 
     /**
+     * Clear all files
+     * @return $this
+     */
+    public function clearFiles(): self
+    {
+        $this->files = [];
+        $this->directFile = null;
+        return $this;
+    }
+
+    /**
      * Return the headers
      * @return array<string, array<int, mixed>>
      */
@@ -392,6 +468,15 @@ class HttpClient
     public function getCookies(): array
     {
         return $this->cookies;
+    }
+
+    /**
+     * Return the files
+     * @return array<string, CURLFile|array<CURLFile>>
+     */
+    public function getFiles(): array
+    {
+        return $this->files;
     }
 
     /**
@@ -683,80 +768,156 @@ class HttpClient
      */
     protected function processBody(CurlHandle $ch, array|object|string|null $body = null): void
     {
-        if ($body === null) {
+        $contentType = $this->headers['Content-Type'][0] ?? '';
+        // Case 1: direct upload (file as request body)
+        if ($this->directFile !== null) {
+            $this->handleDirectFileBody($ch, $this->directFile);
+            $this->directFile = null;
             return;
         }
 
-        if (isset($this->headers['Content-Type'][0])) {
-            $contentType = $this->headers['Content-Type'][0];
-            if (stripos($contentType, 'application/json') !== false) {
-                $body = Json::encode($body);
-            } elseif (stripos($contentType, 'application/x-www-form-urlencoded') !== false) {
-                $body = http_build_query($body);
-            } elseif (stripos($contentType, 'multipart/form-data') !== false) {
-                $boundary = $this->parseBoundaryFromContentType($contentType);
-                $body = $this->buildMultipartBody(/** @var array<mixed> $body */ (array) $body, $boundary);
+        // Case 2: Multipart files + payload
+        if (stripos($contentType, 'multipart/form-data') !== false || count($this->files) > 0) {
+            if (stripos($contentType, 'multipart/form-data') === false && count($this->files) > 0) {
+                $this->multipart();
+            }
+
+            $multipartData = $this->buildMultipartData($body);
+            curl_setopt($ch, CURLOPT_POSTFIELDS, $multipartData);
+            return;
+        }
+        // Case 3: JSON
+        if (stripos($contentType, 'application/json') !== false) {
+            $body = Json::encode($body);
+            curl_setopt($ch, CURLOPT_POSTFIELDS, $body);
+            return;
+        }
+
+        // Case 4: Form urlencoded
+        if (stripos($contentType, 'application/x-www-form-urlencoded') !== false) {
+            $body = http_build_query($body);
+            curl_setopt($ch, CURLOPT_POSTFIELDS, $body);
+            return;
+        }
+        // Case 5: Simple Body
+        if ($body !== null) {
+            curl_setopt($ch, CURLOPT_POSTFIELDS, $body);
+        }
+    }
+
+    /**
+     * Handle direct file upload (as request body)
+     * @param CurlHandle $ch
+     * @param CURLFile $curlFile
+     * @return void
+     */
+    protected function handleDirectFileBody(CurlHandle $ch, CURLFile $curlFile): void
+    {
+        $filename = $curlFile->getFilename();
+        $fp = fopen($filename, 'rb');
+        if ($fp === false) {
+            throw new RuntimeException(sprintf('Can not open file [%s]', $filename));
+        }
+        $size = (int) filesize($filename);
+
+        curl_setopt($ch, CURLOPT_PUT, true);
+        curl_setopt($ch, CURLOPT_INFILE, $fp);
+        curl_setopt($ch, CURLOPT_INFILESIZE, $size);
+
+        $this->tempFiles[] = $fp;
+    }
+
+    /**
+     * Build multipart data with payload
+     * @param array<mixed>|object|string|null $body
+     * @return array<mixed>
+     */
+    protected function buildMultipartData(array|object|string|null $body): array
+    {
+        $multipartData = [];
+
+        // Body payload
+        if (is_array($body)) {
+            $this->flattenMultipartData($multipartData, $body);
+        }
+
+        // Add multipart files
+        foreach ($this->files as $key => $file) {
+            if (is_array($file)) {
+                // Multiple files: documents[0], documents[1], etc.
+                foreach ($file as $index => $curlFile) {
+                    $multipartData[$key . '[' . $index . ']'] = $curlFile;
+                }
+            } else {
+                // Unique file
+                $multipartData[$key] = $file;
             }
         }
 
-        curl_setopt($ch, CURLOPT_POSTFIELDS, $body);
+        return $multipartData;
     }
 
     /**
-     * Parse boundary from request content type
-     * @param string $contentType
-     * @return string
+     * Flatten multipart data
+     * @param array<mixed> &$result
+     * @param array<mixed> $data
+     * @param string $prefix
+     * @return void
      */
-    protected function parseBoundaryFromContentType(string $contentType): string
-    {
-        $match = [];
-        if (preg_match('/boundary="([^\"]+)"/is', $contentType, $match) > 0) {
-            return $match[1];
-        }
+    protected function flattenMultipartData(
+        array &$result,
+        array $data,
+        string $prefix = ''
+    ): void {
+        foreach ($data as $key => $value) {
+            $fieldName = $prefix ? $prefix . '[' . $key . ']' : $key;
 
-        throw new InvalidArgumentException(
-            'The provided Content-Type header contained a "multipart/*" content type but did not '
-                . 'define a boundary.'
-        );
-    }
-
-    /**
-     * Build the multipart body
-     * @param array<string, mixed> $fields
-     * @param string $boundary
-     * @return string
-     */
-    protected function buildMultipartBody(array $fields, string $boundary): string
-    {
-        $body = '';
-        foreach ($fields as $name => $value) {
             if (is_array($value)) {
-                $data = $value['data'];
-                $filename = $value['filename'] ?? false;
-                $mimetype = $value['mimetype'] ?? false;
-
-                $body .= sprintf("--%s\nContent-Disposition: form-data; name=\"%s\"", $boundary, $name);
-                if ($filename !== false) {
-                    $body .= sprintf(";filename=\"%s\"", $filename);
-                }
-
-                if ($mimetype !== false) {
-                    $body .= sprintf("\nContent-Type: \"%s\"", $mimetype);
-                }
-
-                $body .= sprintf("\n\n%s\n", $data);
-            } elseif (!empty($value)) {
-                $body .= sprintf(
-                    "--%s\nContent-Disposition: form-data; name=\"%s\"\n\n%s\n",
-                    $boundary,
-                    $name,
-                    $value
-                );
+                // Recursive array -> field[subkey]
+                $this->flattenMultipartData($result, $value, $fieldName);
+            } else {
+                // Simple value
+                $result[$fieldName] = $value;
             }
         }
+    }
 
-        $body .= sprintf('--%s--', $boundary);
+    /**
+     * Create CURL file
+     * @param string|array{data:string, filename:string, mimetype:string}|CURLFile $file
+     * @return CURLFile
+     * @throws InvalidArgumentException
+     */
+    protected function createCurlFile(string|array|CURLFile $file): CURLFile
+    {
+        if ($file instanceof CURLFile) {
+            return $file;
+        }
 
-        return $body;
+        if (is_string($file) && file_exists($file) && is_file($file)) {
+            return new CURLFile($file);
+        }
+
+        if (is_array($file)) {
+            $tempFile = tmpfile();
+            fwrite($tempFile, $file['data']);
+            $metaData = stream_get_meta_data($tempFile);
+
+            /* This is just to fix PHPStan complaining as normally "uri" will be returned for
+             the tmpfile() */
+            /** @var string $uri */
+            $uri = $metaData['uri'] ?? '';
+
+            $curlFile = new CURLFile(
+                $uri,
+                $file['mimetype'],
+                $file['filename']
+            );
+
+            $this->tempFiles[] = $tempFile;
+            return $curlFile;
+        }
+
+        throw new InvalidArgumentException('Invalid file source');
     }
 }

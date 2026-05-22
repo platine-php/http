@@ -4,12 +4,14 @@ declare(strict_types=1);
 
 namespace Platine\Test\Http\Client;
 
+use CURLFile;
 use InvalidArgumentException;
 use org\bovigo\vfs\vfsStream;
 use Platine\Dev\PlatineTestCase;
 use Platine\Http\Client\Exception\HttpClientException;
 use Platine\Http\Client\HttpClient;
 use Platine\Http\Client\HttpResponse;
+use RuntimeException;
 
 /**
  * @group core
@@ -221,9 +223,6 @@ class HttpClientTest extends PlatineTestCase
 
     public function testAddContentTypeMultipart(): void
     {
-        global $mock_uniqid;
-        $mock_uniqid = true;
-
         $o = new HttpClient('http://localhost');
         $o->contentType('multipart/form-data');
         $headers = $o->getHeaders();
@@ -231,7 +230,7 @@ class HttpClientTest extends PlatineTestCase
         $this->assertCount(1, $headers);
         $this->assertArrayHasKey('Content-Type', $headers);
         $this->assertCount(1, $headers['Content-Type']);
-        $this->assertEquals('multipart/form-data; boundary="uniqid_key"', $headers['Content-Type'][0]);
+        $this->assertEquals('multipart/form-data', $headers['Content-Type'][0]);
     }
 
     public function testBasicAuthentication(): void
@@ -384,6 +383,23 @@ class HttpClientTest extends PlatineTestCase
         $this->assertInstanceOf(HttpResponse::class, $res);
     }
 
+    public function testRequestWithBodySimple(): void
+    {
+        global $mock_curl_exec, $mock_curl_getinfo;
+        $mock_curl_exec = true;
+        $mock_curl_getinfo = true;
+
+        $o = new HttpClient('http://example.com');
+        $o->parameter('user', 1);
+        $o->basicAuthentication('user', 'pwd');
+        $o->header('lang', 'en');
+        $o->cookie('sessionid', '12345678');
+        $o->contentType('text/plain');
+
+        $res = $o->post('/foo/bar', 'foo=bar');
+        $this->assertInstanceOf(HttpResponse::class, $res);
+    }
+
     public function testRequestWithBodyMultipart(): void
     {
         global $mock_curl_exec, $mock_curl_getinfo;
@@ -395,29 +411,112 @@ class HttpClientTest extends PlatineTestCase
         $o->basicAuthentication('user', 'pwd');
         $o->header('lang', 'en');
         $o->cookie('sessionid', '12345678');
-        $o->multipart();
+
+        $o->addFile('foo', ['mimetype' => 'text/plain', 'data' => 'filedata', 'filename' => 'photo.png']);
 
         $res = $o->post(
             '/foo/bar',
             [
-                'age' => 12, 'foo' => ['mimetype' => 'text/plain', 'data' => 'filedata', 'filename' => 'photo.png']]
+                'age' => 12]
         );
         $this->assertInstanceOf(HttpResponse::class, $res);
+        $this->assertCount(1, $o->getFiles());
+        $o->clearFiles();
+        $this->assertCount(0, $o->getFiles());
     }
-
-    public function testRequestWithBodyMultipartMissingBoundary(): void
+    public function testRequestWithBodyMultipartMultiple(): void
     {
-        global $mock_curl_exec;
+        global $mock_curl_exec, $mock_curl_getinfo;
         $mock_curl_exec = true;
+        $mock_curl_getinfo = true;
 
         $o = new HttpClient('http://example.com');
         $o->parameter('user', 1);
         $o->basicAuthentication('user', 'pwd');
         $o->header('lang', 'en');
         $o->cookie('sessionid', '12345678');
-        $o->header('Content-Type', 'multipart/form-data');
+
+        $file = $this->createVfsFile('stream_source_file', $this->vfsFileStreamPath, 'test');
+        $o->addFiles('docs', [
+            new CURLFile($file->url()),
+            ['mimetype' => 'text/plain', 'data' => 'filedata', 'filename' => 'photo.png']
+        ]);
+
+        $res = $o->post(
+            '/foo/bar',
+            [
+                'age' => 12,
+                'tags' => ['red', 'size'],
+            ]
+        );
+        $this->assertInstanceOf(HttpResponse::class, $res);
+        $this->assertCount(1, $o->getFiles());
+        $this->assertArrayHasKey('docs', $o->getFiles());
+    }
+
+    public function testFileUploadAsRequestBody(): void
+    {
+        global $mock_curl_exec, $mock_curl_getinfo;
+        $mock_curl_exec = true;
+        $mock_curl_getinfo = true;
+
+        $file = $this->createVfsFile('stream_source_file', $this->vfsFileStreamPath, 'test');
+
+        $o = new HttpClient('http://example.com');
+        $o->parameter('user', 1);
+        $o->basicAuthentication('user', 'pwd');
+        $o->header('lang', 'en');
+        $o->cookie('sessionid', '12345678');
+
+        $o->addFileAsBody($file->url());
+
+        $res = $o->post(
+            '/foo/bar',
+            []
+        );
+        $this->assertInstanceOf(HttpResponse::class, $res);
+    }
+
+    public function testFileUploadAsRequestBodyFileNotFound(): void
+    {
+        global $mock_curl_exec, $mock_curl_getinfo;
+        $mock_curl_exec = true;
+        $mock_curl_getinfo = true;
+
+        $o = new HttpClient('http://example.com');
+        $o->parameter('user', 1);
+        $o->basicAuthentication('user', 'pwd');
+        $o->header('lang', 'en');
+        $o->cookie('sessionid', '12345678');
 
         $this->expectException(InvalidArgumentException::class);
-        $o->post('/foo/bar', ['foo' => 'bar']);
+        $o->addFileAsBody('/path/does/not/exist');
+
+        $o->post(
+            '/foo/bar',
+            []
+        );
+    }
+
+    public function testFileUploadAsRequestBodyFopenError(): void
+    {
+        global $mock_curl_exec, $mock_curl_getinfo, $mock_fopen;
+        $mock_curl_exec = true;
+        $mock_curl_getinfo = true;
+        $mock_fopen = true;
+
+        $o = new HttpClient('http://example.com');
+        $o->parameter('user', 1);
+        $o->basicAuthentication('user', 'pwd');
+        $o->header('lang', 'en');
+        $o->cookie('sessionid', '12345678');
+
+        $this->expectException(RuntimeException::class);
+        $o->addFileAsBody(['mimetype' => 'text/plain', 'data' => 'filedata', 'filename' => 'photo.png']);
+
+        $o->post(
+            '/foo/bar',
+            []
+        );
     }
 }
