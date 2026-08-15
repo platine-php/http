@@ -250,7 +250,7 @@ class Uri implements UriInterface
     /**
      * {@inheritdoc}
      */
-    public function withUserInfo(string $user, string $password = null): self
+    public function withUserInfo(string $user, ?string $password = null): self
     {
         $userInfo = $user;
         if ($userInfo !== null && $password !== null && $password !== '') {
