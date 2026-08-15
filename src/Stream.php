@@ -361,7 +361,7 @@ class Stream implements StreamInterface
     /**
      * {@inheritdoc}
      */
-    public function getMetadata(string $key = null)
+    public function getMetadata(?string $key = null)
     {
         if ($this->resource === null) {
             throw new RuntimeException('Stream resource is detached');
