@@ -113,7 +113,7 @@ function parse_url(string $url, int $component = -1)
     }
 }
 
-function preg_match(string $pattern, string $subject, array &$matches = null, int $flags = 0, int $offset = 0)
+function preg_match(string $pattern, string $subject, ?array &$matches = null, int $flags = 0, int $offset = 0)
 {
     global $mock_preg_match_to_false, $mock_preg_match_to_true;
     if ($mock_preg_match_to_false) {

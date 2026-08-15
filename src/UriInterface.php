@@ -251,7 +251,7 @@ interface UriInterface
      * @param null|string $password The password associated with $user.
      * @return \Platine\Http\UriInterface A new instance with the specified user information.
      */
-    public function withUserInfo(string $user, string $password = null): UriInterface;
+    public function withUserInfo(string $user, ?string $password = null): UriInterface;
 
     /**
      * Return an instance with the specified host.
